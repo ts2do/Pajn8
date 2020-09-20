@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Pajn8
+﻿namespace Pajn8
 {
     internal struct Part
     {
