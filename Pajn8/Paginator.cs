@@ -81,14 +81,14 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] values = ToArray(items);
             int length = values.Length;
-            var keys = AllocateArray<IndexedComparable<T>>(length);
+            var keys = AllocateArray<StableComparable<T>>(length);
             for (int i = 0; i < length; ++i)
             {
                 ref var key = ref keys[i];
                 key.Value = values[i];
                 key.Index = i;
             }
-            return new ComparablePaginator<IndexedComparable<T>, T>(keys, values);
+            return new ComparablePaginator<StableComparable<T>, T>(keys, values);
         }
 
         /// <summary>
@@ -253,8 +253,8 @@ namespace Pajn8
             if (keys is null) throw new ArgumentNullException(nameof(keys));
             if (values is null) throw new ArgumentNullException(nameof(values));
             TValue[] valueArray = ToArray(values);
-            IndexedComparable<TKey>[] indexedKeys = CreateIndexedComparableArray(keys, valueArray.Length);
-            return new ComparablePaginator<IndexedComparable<TKey>, TValue>(indexedKeys, valueArray);
+            StableComparable<TKey>[] indexedKeys = CreateIndexedComparableArray(keys, valueArray.Length);
+            return new ComparablePaginator<StableComparable<TKey>, TValue>(indexedKeys, valueArray);
         }
 
         /// <summary>
@@ -341,14 +341,14 @@ namespace Pajn8
             where TKey : IComparable<TKey>
         {
             int length = values.Length;
-            var keys = AllocateArray<IndexedComparable<TKey>>(length);
+            var keys = AllocateArray<StableComparable<TKey>>(length);
             for (int i = 0; i < length; ++i)
             {
-                ref IndexedComparable<TKey> key = ref keys[i];
+                ref StableComparable<TKey> key = ref keys[i];
                 key.Value = keySelector(values[i]);
                 key.Index = i;
             }
-            return new Paginator<IndexedComparable<TKey>, TValue, ComparableComparer<IndexedComparable<TKey>>>(keys, values, default);
+            return new Paginator<StableComparable<TKey>, TValue, ComparableComparer<StableComparable<TKey>>>(keys, values, default);
         }
 
         private static IPaginator<TValue> CreateStableWithSelector<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
@@ -414,14 +414,14 @@ namespace Pajn8
             }
         }
 
-        private static IndexedComparable<T>[] CreateIndexedComparableArray<T>(IEnumerable<T> items, int expectedLength)
+        private static StableComparable<T>[] CreateIndexedComparableArray<T>(IEnumerable<T> items, int expectedLength)
             where T : IComparable<T>
         {
             if (items is T[] array)
             {
                 int length = array.Length;
                 if (length != expectedLength) throw ArrayLengthMismatch();
-                var indexedKeys = AllocateArray<IndexedComparable<T>>(length);
+                var indexedKeys = AllocateArray<StableComparable<T>>(length);
                 for (int i = 0; i < length; ++i)
                 {
                     ref var key = ref indexedKeys[i];
@@ -435,7 +435,7 @@ namespace Pajn8
                 using List<T>.Enumerator enumerator = list.GetEnumerator();
                 int length = list.Count;
                 if (length != expectedLength) throw ArrayLengthMismatch();
-                var indexedKeys = AllocateArray<IndexedComparable<T>>(length);
+                var indexedKeys = AllocateArray<StableComparable<T>>(length);
                 for (int i = 0; i < length; ++i)
                 {
                     enumerator.MoveNext(); // Enforced by comodification checks
@@ -447,7 +447,7 @@ namespace Pajn8
             }
             else
             {
-                var indexedKeys = AllocateArray<IndexedComparable<T>>(16);
+                var indexedKeys = AllocateArray<StableComparable<T>>(16);
                 int length = 0;
                 foreach (var key in items)
                 {

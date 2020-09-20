@@ -3,13 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Pajn8
 {
-    internal struct IndexedComparable<T> : IComparable<IndexedComparable<T>>
+    internal struct StableComparable<T> : IComparable<StableComparable<T>>
         where T : IComparable<T>
     {
         public T Value;
         public int Index;
 
-        public int CompareTo([AllowNull] IndexedComparable<T> other)
+        public int CompareTo([AllowNull] StableComparable<T> other)
         {
             int c;
             if (Value is null)
