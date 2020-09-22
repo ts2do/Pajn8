@@ -7,12 +7,12 @@ namespace Pajn8
         public int StartIndex { get; }
         public int EndIndex { get; }
         public bool IsSorted { get; set; }
+        public PartitionNode LeftNode { get; private set; }
+        public PartitionNode RightNode { get; private set; }
 
         public int Count => EndIndex - StartIndex;
 
         private int splitIndex = -1;
-        private PartitionNode leftNode;
-        private PartitionNode rightNode;
 
         public PartitionNode(int startIndex, int endIndex)
         {
@@ -26,9 +26,9 @@ namespace Pajn8
             while (x.splitIndex >= 0)
             {
                 if (index < x.splitIndex)
-                    x = x.leftNode;
+                    x = x.LeftNode;
                 else
-                    x = x.rightNode;
+                    x = x.RightNode;
             }
             return x;
         }
@@ -37,13 +37,11 @@ namespace Pajn8
         {
             Debug.Assert(!IsSorted);
             Debug.Assert(splitIndex > StartIndex && splitIndex < EndIndex);
-            Debug.Assert(this.splitIndex < 0 && leftNode == null && rightNode == null);
+            Debug.Assert(this.splitIndex < 0 && LeftNode == null && RightNode == null);
 
             this.splitIndex = splitIndex;
-
-            leftNode = new PartitionNode(StartIndex, splitIndex);
-
-            rightNode = new PartitionNode(splitIndex, EndIndex);
+            LeftNode = new PartitionNode(StartIndex, splitIndex);
+            RightNode = new PartitionNode(splitIndex, EndIndex);
         }
     }
 }

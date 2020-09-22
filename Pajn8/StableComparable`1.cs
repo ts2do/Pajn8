@@ -23,7 +23,7 @@ namespace Pajn8
                 c = Value.CompareTo(other.Value);
                 if (c == 0)
                 {
-                    c = Index.CompareTo(other.Index);
+                    c = Index - other.Index;
                 }
             }
             return c;
