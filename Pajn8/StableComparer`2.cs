@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Pajn8
 {
@@ -14,6 +15,7 @@ namespace Pajn8
             this.impl = impl;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Compare([AllowNull] Indexed<T> x, [AllowNull] Indexed<T> y)
         {
             int c = impl.Compare(x.Value, y.Value);

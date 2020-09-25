@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Pajn8
 {
@@ -65,98 +64,130 @@ namespace Pajn8
             }
 
 #if DEBUG
-            Verify(start, end);
-
-            void Verify(int start, int end)
-            {
-                EqualityComparer<TValue> valueComparer = EqualityComparer<TValue>.Default;
-                for (int i = start; i < end; ++i)
-                {
-                    if (comparer.Compare(keys[i], sortedKeys[i]) != 0)
-                        throw new Exception("Verification failed");
-                    //if (!valueComparer.Equals(values[i], sortedValues[i]))
-                    //    throw new Exception("Verification failed");
-                }
-            }
+            for (int i = start; i < end; ++i)
+                if (comparer.Compare(keys[i], sortedKeys[i]) != 0)
+                    throw new Exception("Verification failed");
 #endif
         }
 
-        private static void SwapIfGreater(TKey[] keys, ref TComparer comparer, TValue[] values, int i, int j)
-        {
-            Debug.Assert(0 <= i && i < keys.Length);
-            Debug.Assert(0 <= j && j < keys.Length);
-
-            if (i != j)
-            {
-                ref TKey keysI = ref keys[i];
-                TKey keyI = keysI;
-                ref TKey keysJ = ref keys[j];
-                TKey keyJ = keysJ;
-                if (comparer.Compare(keyI, keyJ) > 0)
-                {
-                    keysI = keyJ;
-                    keysJ = keyI;
-
-                    ref TValue valuesI = ref values[i];
-                    ref TValue valuesJ = ref values[j];
-                    TValue value = valuesI;
-                    valuesI = valuesJ;
-                    valuesJ = value;
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Swap(TKey[] keys, TValue[] values, int i, int j)
-        {
-            if (i != j)
-            {
-                ref TKey keysI = ref keys[i];
-                ref TKey keysJ = ref keys[j];
-                TKey key = keysI;
-                keysI = keysJ;
-                keysJ = key;
-
-                ref TValue valuesI = ref values[i];
-                ref TValue valuesJ = ref values[j];
-                TValue value = valuesI;
-                valuesI = valuesJ;
-                valuesJ = value;
-            }
-        }
-
-        public static int PickPivotAndPartition(TKey[] keys, ref TComparer comparer, TValue[] values, int lo, int hi)
+        private int PickPivotAndPartition(TKey[] keys, ref TComparer comparer, TValue[] values, int first, int last)
         {
             Debug.Assert(comparer != null);
             Debug.Assert(keys.Length > 0);
 
-            int mid = lo + ((hi - lo) / 2);
+            int left = first, right = last - 1;
+            int count = last - first;
+            int mid = first + (count / 2);
+            TKey pivot = MedianOfThree(keys, ref comparer, values, first, mid, last);
 
-            SwapIfGreater(keys, ref comparer, values, lo, mid);
-            SwapIfGreater(keys, ref comparer, values, lo, hi);
-            SwapIfGreater(keys, ref comparer, values, mid, hi);
-
-            TKey pivot = keys[mid];
-            Swap(keys, values, mid, hi - 1);
-            int left = lo, right = hi - 1;
-
-            while (true)
+            while (left < right)
             {
                 while (comparer.Compare(keys[++left], pivot) < 0)
-                    if (left == hi)
+                    if (left == last)
                         throw new ArgumentException(string.Format(Strings.Arg_BogusIComparer, comparer));
                 while (comparer.Compare(pivot, keys[--right]) < 0)
-                    if (right == lo)
+                    if (right == first)
                         throw new ArgumentException(string.Format(Strings.Arg_BogusIComparer, comparer));
 
-                if (left >= right)
-                    break;
-
-                Swap(keys, values, left, right);
+                if (left < right)
+                {
+                    // Swap (left) and (right)
+                    ref TKey key1 = ref keys[left];
+                    TKey tmpKey = key1;
+                    ref TKey key2 = ref keys[right];
+                    key1 = key2;
+                    key2 = pivot;
+                    ref TValue value1 = ref values[left];
+                    TValue tmpValue = value1;
+                    ref TValue value2 = ref values[right];
+                    value1 = value2;
+                    value2 = tmpValue;
+                }
             }
 
-            Swap(keys, values, left, hi - 1);
+            {
+                // Swap (left) and (last - 1)
+                ref TKey key1 = ref keys[left];
+                TKey tmpKey = key1;
+                ref TKey key2 = ref keys[last - 1];
+                key1 = key2;
+                key2 = pivot;
+                ref TValue value1 = ref values[left];
+                TValue tmpValue = value1;
+                ref TValue value2 = ref values[last - 1];
+                value1 = value2;
+                value2 = tmpValue;
+            }
+#if DEBUG
+            for (int i = first; i < left; ++i)
+                Debug.Assert(comparer.Compare(keys[i], pivot) <= 0);
+            for (int i = left + 1; i <= last; ++i)
+                Debug.Assert(comparer.Compare(keys[i], pivot) >= 0);
+            Debug.Assert(comparer.Compare(pivot, sortedKeys[left]) == 0);
+#endif
             return left;
+        }
+
+        private static TKey MedianOfThree(TKey[] keys, ref TComparer comparer, TValue[] values, int first, int mid, int last)
+        {
+            ref TKey firstKey = ref keys[first];
+            ref TKey midKey = ref keys[mid];
+            ref TKey lastKey = ref keys[last];
+            ref TValue firstValue = ref values[first];
+            ref TValue midValue = ref values[mid];
+            TKey tmpKey;
+            TValue tmpValue;
+            if (comparer.Compare(firstKey, midKey) > 0)
+            {
+                // Swap (first) and (mid)
+                tmpKey = firstKey;
+                firstKey = midKey;
+                midKey = tmpKey;
+                tmpValue = firstValue;
+                firstValue = midValue;
+                midValue = tmpValue;
+            }
+
+            if (comparer.Compare(midKey, lastKey) > 0)
+            {
+                {
+                    // Swap (mid) and (last)
+                    tmpKey = midKey;
+                    midKey = lastKey;
+                    lastKey = tmpKey;
+                    ref TValue lastValue = ref values[last];
+                    tmpValue = midValue;
+                    midValue = lastValue;
+                    lastValue = tmpValue;
+                }
+
+                if (comparer.Compare(firstKey, midKey) > 0)
+                {
+                    // Swap (first) and (mid)
+                    tmpKey = firstKey;
+                    firstKey = midKey;
+                    midKey = tmpKey;
+                    tmpValue = firstValue;
+                    firstValue = midValue;
+                    midValue = tmpValue;
+                }
+            }
+
+            {
+                // Move (mid) to (last - 1)
+                ref TKey key1 = ref midKey;
+                TKey pivot = key1;
+                ref TKey key2 = ref keys[last - 1];
+                key1 = key2;
+                key2 = pivot;
+                ref TValue value1 = ref values[mid];
+                tmpValue = value1;
+                ref TValue value2 = ref values[last - 1];
+                value1 = value2;
+                value2 = tmpValue;
+
+                return pivot;
+            }
         }
     }
 }

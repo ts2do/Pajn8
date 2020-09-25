@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Pajn8
 {
@@ -9,6 +10,7 @@ namespace Pajn8
         public T Value;
         public int Index;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CompareTo([AllowNull] StableComparable<T> other)
         {
             int c;

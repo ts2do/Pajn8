@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Pajn8
 {
@@ -61,85 +60,102 @@ namespace Pajn8
             }
 
 #if DEBUG
-            Verify(start, end);
-
-            void Verify(int start, int end)
-            {
-                for (int i = start; i < end; ++i)
-                {
-                    if (comparer.Compare(items[i], sortedItems[i]) != 0)
-                        throw new Exception("Verification failed");
-                    //if (!valueComparer.Equals(values[i], sortedValues[i]))
-                    //    throw new Exception("Verification failed");
-                }
-            }
+            for (int i = start; i < end; ++i)
+                if (comparer.Compare(items[i], sortedItems[i]) != 0)
+                    throw new Exception("Verification failed");
 #endif
         }
 
-        private static void SwapIfGreater(T[] items, ref TComparer comparer, int i, int j)
+        private int PickPivotAndPartition(T[] items, ref TComparer comparer, int first, int last)
         {
-            Debug.Assert(0 <= i && i < items.Length);
-            Debug.Assert(0 <= j && j < items.Length);
+            Debug.Assert(comparer != null);
+            Debug.Assert(items.Length > 0);
 
-            if (i != j)
-            {
-                ref T itemsI = ref items[i];
-                T itemI = itemsI;
-                ref T itemsJ = ref items[j];
-                T itemJ = itemsJ;
-                if (comparer.Compare(itemI, itemJ) > 0)
-                {
-                    itemsI = itemJ;
-                    itemsJ = itemI;
-                }
-            }
-        }
+            int left = first, right = last - 1;
+            int count = last - first;
+            int mid = first + (count / 2);
+            T pivot = MedianOfThree(items, ref comparer, first, mid, last);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Swap(T[] items, int i, int j)
-        {
-            Debug.Assert(0 <= i && i < items.Length);
-            Debug.Assert(0 <= j && j < items.Length);
-
-            if (i != j)
-            {
-                ref T itemsI = ref items[i];
-                ref T itemsJ = ref items[j];
-                T tmp = itemsI;
-                itemsI = itemsJ;
-                itemsJ = tmp;
-            }
-        }
-
-        public static int PickPivotAndPartition(T[] items, ref TComparer comparer, int lo, int hi)
-        {
-            int mid = lo + ((hi - lo) / 2);
-
-            SwapIfGreater(items, ref comparer, lo, mid);
-            SwapIfGreater(items, ref comparer, lo, hi);
-            SwapIfGreater(items, ref comparer, mid, hi);
-
-            T pivot = items[mid];
-            Swap(items, mid, hi - 1);
-            int left = lo, right = hi - 1;
-
-            while (true)
+            while (left < right)
             {
                 while (comparer.Compare(items[++left], pivot) < 0)
-                    if (left == hi)
+                    if (left == last)
                         throw new ArgumentException(string.Format(Strings.Arg_BogusIComparer, comparer));
                 while (comparer.Compare(pivot, items[--right]) < 0)
-                    if (right == lo)
+                    if (right == first)
                         throw new ArgumentException(string.Format(Strings.Arg_BogusIComparer, comparer));
 
-                if (left >= right)
-                    break;
-
-                Swap(items, left, right);
+                if (left < right)
+                {
+                    // Swap (left) and (right)
+                    ref T item1 = ref items[left];
+                    T tmpItem = item1;
+                    ref T item2 = ref items[right];
+                    item1 = item2;
+                    item2 = pivot;
+                }
             }
 
-            Swap(items, left, hi - 1);
+            {
+                // Swap (left) and (last - 1)
+                ref T item1 = ref items[left];
+                T tmpItem = item1;
+                ref T item2 = ref items[last - 1];
+                item1 = item2;
+                item2 = pivot;
+            }
+#if DEBUG
+            for (int i = first; i < left; ++i)
+                Debug.Assert(comparer.Compare(items[i], pivot) <= 0);
+            for (int i = left + 1; i <= last; ++i)
+                Debug.Assert(comparer.Compare(items[i], pivot) >= 0);
+            Debug.Assert(comparer.Compare(pivot, sortedItems[left]) == 0);
+#endif
             return left;
+        }
+
+        private static T MedianOfThree(T[] items, ref TComparer comparer, int first, int mid, int last)
+        {
+            ref T firstItem = ref items[first];
+            ref T midItem = ref items[mid];
+            ref T lastItem = ref items[last];
+            T tmpItem;
+            if (comparer.Compare(firstItem, midItem) > 0)
+            {
+                // Swap (first) and (mid)
+                tmpItem = firstItem;
+                firstItem = midItem;
+                midItem = tmpItem;
+            }
+
+            if (comparer.Compare(midItem, lastItem) > 0)
+            {
+                {
+                    // Swap (mid) and (last)
+                    tmpItem = midItem;
+                    midItem = lastItem;
+                    lastItem = tmpItem;
+                }
+
+                if (comparer.Compare(firstItem, midItem) > 0)
+                {
+                    // Swap (first) and (mid)
+                    tmpItem = firstItem;
+                    firstItem = midItem;
+                    midItem = tmpItem;
+                }
+            }
+
+            {
+                // Move (mid) to (last - 1)
+                ref T item1 = ref midItem;
+                T pivot = item1;
+                ref T item2 = ref items[last - 1];
+                item1 = item2;
+                item2 = pivot;
+
+                return pivot;
+            }
         }
     }
 }
