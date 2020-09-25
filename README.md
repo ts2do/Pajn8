@@ -1,5 +1,5 @@
 # Pajn8
-Leverage partitioning to efficiently sort a subset (a page) of an array
+Leverage partitioning to efficiently sort a subset of an array.
 
 It's unnecessary to sort an entire collection when only a small range of items is desired.
 This project demonstrates partitioning an input array to help fulfill calls to ``GetPage`` and memoizing the partitions to leverage them for subsequent calls to ``GetPage``.
