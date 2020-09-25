@@ -74,7 +74,25 @@ namespace Pajn8
             int left = first, right = last - 1;
             int count = last - first;
             int mid = first + (count / 2);
-            T pivot = MedianOfThree(items, ref comparer, first, mid, last);
+            if (count > 40)
+            {
+                // John Tukey's ninther
+                int step = (count + 1) / 8;
+                MedianOfThree(items, ref comparer, first + step, first, first + step * 2);
+                MedianOfThree(items, ref comparer, mid - step, mid, mid + step);
+                MedianOfThree(items, ref comparer, last - step * 2, last, last - step);
+            }
+            MedianOfThree(items, ref comparer, first, mid, last);
+
+            T pivot;
+            {
+                // Move (mid) to (last - 1)
+                ref T key1 = ref items[mid];
+                pivot = key1;
+                ref T key2 = ref items[last - 1];
+                key1 = key2;
+                key2 = pivot;
+            }
 
             while (left < right)
             {
@@ -97,29 +115,36 @@ namespace Pajn8
             }
 
             {
-                // Swap (left) and (last - 1)
-                ref T item1 = ref items[left];
-                T tmpItem = item1;
-                ref T item2 = ref items[last - 1];
+                // Move pivot to destination
+                ref T item1 = ref items[last - 1];
+                ref T item2 = ref items[left];
                 item1 = item2;
                 item2 = pivot;
             }
+
 #if DEBUG
-            for (int i = first; i < left; ++i)
-                Debug.Assert(comparer.Compare(items[i], pivot) <= 0);
-            for (int i = left + 1; i <= last; ++i)
-                Debug.Assert(comparer.Compare(items[i], pivot) >= 0);
+            T[] lowerItems = items[first..left];
+            T[] upperKeys = items[left..(last + 1)];
+            Array.Sort(lowerItems, comparer);
+            Array.Sort(upperKeys, comparer);
+            foreach (T x in lowerItems)
+                Debug.Assert(comparer.Compare(x, pivot) <= 0);
+            foreach (T x in upperKeys)
+                Debug.Assert(comparer.Compare(x, pivot) >= 0);
             Debug.Assert(comparer.Compare(pivot, sortedItems[left]) == 0);
 #endif
+
             return left;
         }
 
-        private static T MedianOfThree(T[] items, ref TComparer comparer, int first, int mid, int last)
+        private static void MedianOfThree(T[] items, ref TComparer comparer, int first, int mid, int last)
         {
             ref T firstItem = ref items[first];
             ref T midItem = ref items[mid];
             ref T lastItem = ref items[last];
+
             T tmpItem;
+
             if (comparer.Compare(firstItem, midItem) > 0)
             {
                 // Swap (first) and (mid)
@@ -144,17 +169,6 @@ namespace Pajn8
                     firstItem = midItem;
                     midItem = tmpItem;
                 }
-            }
-
-            {
-                // Move (mid) to (last - 1)
-                ref T item1 = ref midItem;
-                T pivot = item1;
-                ref T item2 = ref items[last - 1];
-                item1 = item2;
-                item2 = pivot;
-
-                return pivot;
             }
         }
     }

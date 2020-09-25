@@ -78,7 +78,31 @@ namespace Pajn8
             int left = first, right = last - 1;
             int count = last - first;
             int mid = first + (count / 2);
-            TKey pivot = MedianOfThree(keys, ref comparer, values, first, mid, last);
+            if (count > 40)
+            {
+                // John Tukey's ninther
+                int step = (count + 1) / 8;
+                MedianOfThree(keys, ref comparer, values, first + step, first, first + step * 2);
+                MedianOfThree(keys, ref comparer, values, mid - step, mid, mid + step);
+                MedianOfThree(keys, ref comparer, values, last - step * 2, last, last - step);
+            }
+            MedianOfThree(keys, ref comparer, values, first, mid, last);
+
+            TKey pivot;
+            {
+                // Move (mid) to (last - 1)
+                ref TKey key1 = ref keys[mid];
+                pivot = key1;
+                ref TKey key2 = ref keys[last - 1];
+                key1 = key2;
+                key2 = pivot;
+
+                ref TValue value1 = ref values[mid];
+                TValue tmpValue = value1;
+                ref TValue value2 = ref values[last - 1];
+                value1 = value2;
+                value2 = tmpValue;
+            }
 
             while (left < right)
             {
@@ -96,7 +120,8 @@ namespace Pajn8
                     TKey tmpKey = key1;
                     ref TKey key2 = ref keys[right];
                     key1 = key2;
-                    key2 = pivot;
+                    key2 = tmpKey;
+
                     ref TValue value1 = ref values[left];
                     TValue tmpValue = value1;
                     ref TValue value2 = ref values[right];
@@ -106,43 +131,53 @@ namespace Pajn8
             }
 
             {
-                // Swap (left) and (last - 1)
-                ref TKey key1 = ref keys[left];
-                TKey tmpKey = key1;
-                ref TKey key2 = ref keys[last - 1];
+                // Move pivot to destination
+                ref TKey key1 = ref keys[last - 1];
+                ref TKey key2 = ref keys[left];
                 key1 = key2;
                 key2 = pivot;
-                ref TValue value1 = ref values[left];
+
+                ref TValue value1 = ref values[last - 1];
                 TValue tmpValue = value1;
-                ref TValue value2 = ref values[last - 1];
+                ref TValue value2 = ref values[left];
                 value1 = value2;
                 value2 = tmpValue;
             }
+
 #if DEBUG
-            for (int i = first; i < left; ++i)
-                Debug.Assert(comparer.Compare(keys[i], pivot) <= 0);
-            for (int i = left + 1; i <= last; ++i)
-                Debug.Assert(comparer.Compare(keys[i], pivot) >= 0);
+            TKey[] lowerKeys = keys[first..left];
+            TKey[] upperKeys = keys[left..(last + 1)];
+            Array.Sort(lowerKeys, comparer);
+            Array.Sort(upperKeys, comparer);
+            foreach (TKey x in lowerKeys)
+                Debug.Assert(comparer.Compare(x, pivot) <= 0);
+            foreach (TKey x in upperKeys)
+                Debug.Assert(comparer.Compare(x, pivot) >= 0);
             Debug.Assert(comparer.Compare(pivot, sortedKeys[left]) == 0);
 #endif
+
             return left;
         }
 
-        private static TKey MedianOfThree(TKey[] keys, ref TComparer comparer, TValue[] values, int first, int mid, int last)
+        private static void MedianOfThree(TKey[] keys, ref TComparer comparer, TValue[] values, int first, int mid, int last)
         {
             ref TKey firstKey = ref keys[first];
             ref TKey midKey = ref keys[mid];
             ref TKey lastKey = ref keys[last];
+
             ref TValue firstValue = ref values[first];
             ref TValue midValue = ref values[mid];
+
             TKey tmpKey;
             TValue tmpValue;
+
             if (comparer.Compare(firstKey, midKey) > 0)
             {
                 // Swap (first) and (mid)
                 tmpKey = firstKey;
                 firstKey = midKey;
                 midKey = tmpKey;
+
                 tmpValue = firstValue;
                 firstValue = midValue;
                 midValue = tmpValue;
@@ -155,6 +190,7 @@ namespace Pajn8
                     tmpKey = midKey;
                     midKey = lastKey;
                     lastKey = tmpKey;
+
                     ref TValue lastValue = ref values[last];
                     tmpValue = midValue;
                     midValue = lastValue;
@@ -167,26 +203,11 @@ namespace Pajn8
                     tmpKey = firstKey;
                     firstKey = midKey;
                     midKey = tmpKey;
+
                     tmpValue = firstValue;
                     firstValue = midValue;
                     midValue = tmpValue;
                 }
-            }
-
-            {
-                // Move (mid) to (last - 1)
-                ref TKey key1 = ref midKey;
-                TKey pivot = key1;
-                ref TKey key2 = ref keys[last - 1];
-                key1 = key2;
-                key2 = pivot;
-                ref TValue value1 = ref values[mid];
-                tmpValue = value1;
-                ref TValue value2 = ref values[last - 1];
-                value1 = value2;
-                value2 = tmpValue;
-
-                return pivot;
             }
         }
     }
