@@ -13,7 +13,7 @@ namespace Pajn8
         /// <typeparam name="T">Type of items to sort</typeparam>
         /// <param name="items">Items to sort</param>
         /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<T> CreateUnsafe<T>(T[] items)
+        public static IPaginator<T> CreateDirect<T>(T[] items)
             where T : IComparable<T>
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
@@ -29,7 +29,7 @@ namespace Pajn8
         /// <param name="items">Items to sort</param>
         /// <param name="comparer">Comparer by which to sort</param>
         /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<T> CreateUnsafe<T, TComparer>(T[] items, TComparer comparer)
+        public static IPaginator<T> CreateDirect<T, TComparer>(T[] items, TComparer comparer)
             where TComparer : IComparer<T>
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
@@ -126,7 +126,7 @@ namespace Pajn8
         /// <param name="keys">Keys on which to sort</param>
         /// <param name="values">Values associated with the keys</param>
         /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<TValue> CreateUnsafe<TKey, TValue>(TKey[] keys, TValue[] values)
+        public static IPaginator<TValue> CreateDirect<TKey, TValue>(TKey[] keys, TValue[] values)
             where TKey : IComparable<TKey>
         {
             if (keys is null) throw new ArgumentNullException(nameof(keys));
@@ -146,7 +146,7 @@ namespace Pajn8
         /// <param name="values">Values associated with the keys</param>
         /// <param name="comparer">Comparer by which to sort</param>
         /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<TValue> CreateUnsafe<TKey, TValue, TComparer>(TKey[] keys, TValue[] values, TComparer comparer)
+        public static IPaginator<TValue> CreateDirect<TKey, TValue, TComparer>(TKey[] keys, TValue[] values, TComparer comparer)
             where TComparer : IComparer<TKey>
         {
             if (keys is null) throw new ArgumentNullException(nameof(keys));
