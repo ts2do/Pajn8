@@ -4,7 +4,7 @@ namespace Pajn8
 {
     public interface IPaginator<T>
     {
-        ReadOnlySpan<T> GetPage(int offset, int pageSize);
-        ReadOnlySpan<T> GetPage(Range range);
+        ArraySegment<T> GetPage(int offset, int pageSize);
+        ArraySegment<T> GetPage(Range range);
     }
 }

@@ -5,9 +5,9 @@ namespace Pajn8
     internal abstract class PaginatorBase<T> : IPaginator<T>
     {
         internal abstract int Length { get; }
-        internal abstract ReadOnlySpan<T> GetPageInternal(int start, int end, int pageSize);
+        internal abstract ArraySegment<T> GetPageInternal(int start, int end, int pageSize);
 
-        public ReadOnlySpan<T> GetPage(int offset, int pageSize)
+        public ArraySegment<T> GetPage(int offset, int pageSize)
         {
             int length = Length;
             if ((uint)offset >= (uint)length)
@@ -20,7 +20,7 @@ namespace Pajn8
             return GetPageInternal(offset, offset + pageSize, pageSize);
         }
 
-        public ReadOnlySpan<T> GetPage(Range range)
+        public ArraySegment<T> GetPage(Range range)
         {
             ExtractFromRange(range, out int length, out int start, out int end);
 

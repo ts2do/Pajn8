@@ -14,6 +14,6 @@ namespace Pajn8
             impl = new Paginator<T, ComparableComparer<T>>(items, default);
         }
 
-        internal override ReadOnlySpan<T> GetPageInternal(int start, int end, int pageSize) => impl.GetPageInternal(start, end, pageSize);
+        internal override ArraySegment<T> GetPageInternal(int start, int end, int pageSize) => impl.GetPageInternal(start, end, pageSize);
     }
 }

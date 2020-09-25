@@ -33,14 +33,14 @@ namespace Pajn8
             rootNode = new PartitionNode(0, keys.Length);
         }
 
-        internal override ReadOnlySpan<TValue> GetPageInternal(int start, int end, int pageSize)
+        internal override ArraySegment<TValue> GetPageInternal(int start, int end, int pageSize)
         {
             if (pageSize == 0)
                 return default;
 
             DivideAndSort(start, end, pageSize);
 
-            return values.AsSpan(start, pageSize);
+            return new ArraySegment<TValue>(values, start, pageSize);
         }
 
         private void DivideAndSort(int start, int end, int pageSize)

@@ -8,7 +8,7 @@ The ``Paginator.Create`` and ``Paginator.CreateDirect`` method overloads return 
 ```csharp
 public interface IPaginator<T>
 {
-    ReadOnlySpan<T> GetPage(int offset, int pageSize);
-    ReadOnlySpan<T> GetPage(Range range);
+    ArraySegment<T> GetPage(int offset, int pageSize);
+    ArraySegment<T> GetPage(Range range);
 }
 ```
