@@ -51,7 +51,7 @@ namespace Pajn8
                     {
                         int k = PickPivotAndPartition(items, ref comparer, p.StartIndex, p.EndIndex - 1);
                         p.Split(k);
-                        p = k >= position ? p.LeftNode : p.RightNode;
+                        p = k > position ? p.LeftNode : p.RightNode;
                     }
 
                     Array.Sort(items, p.StartIndex, p.Count, comparer);

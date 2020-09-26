@@ -18,7 +18,7 @@ namespace Pajn8
             {
                 c = -1;
                 if (other.Value is null)
-                    c = 0;
+                    c = Index - other.Index;
             }
             else
             {
