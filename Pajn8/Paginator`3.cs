@@ -16,6 +16,7 @@ namespace Pajn8
         private readonly TValue[] values;
         [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain value types")]
         private TComparer comparer;
+        private readonly IComparer<TKey> boxedComparer;
         private readonly PartitionNode rootNode;
 
         internal override int Length => keys.Length;
@@ -30,6 +31,7 @@ namespace Pajn8
             this.keys = keys;
             this.values = values;
             this.comparer = comparer;
+            boxedComparer = comparer;
             rootNode = new PartitionNode(0, keys.Length);
         }
 
@@ -53,12 +55,12 @@ namespace Pajn8
                 {
                     while (end < p.EndIndex - pageSize || start - pageSize > p.StartIndex)
                     {
-                        int k = PickPivotAndPartition(keys, ref comparer, values, p.StartIndex, p.EndIndex - 1);
+                        int k = PickPivotAndPartition(keys, values, ref comparer, p.StartIndex, p.EndIndex - 1);
                         p.Split(k);
                         p = k > position ? p.LeftNode : p.RightNode;
                     }
 
-                    Array.Sort(keys, values, p.StartIndex, p.Count, comparer);
+                    Array.Sort(keys, values, p.StartIndex, p.Count, boxedComparer);
                     p.IsSorted = true;
                 }
             }
@@ -70,7 +72,7 @@ namespace Pajn8
 #endif
         }
 
-        private int PickPivotAndPartition(TKey[] keys, ref TComparer comparer, TValue[] values, int first, int last)
+        private int PickPivotAndPartition(TKey[] keys, TValue[] values, ref TComparer comparer, int first, int last)
         {
             Debug.Assert(comparer != null);
             Debug.Assert(keys.Length > 0);
@@ -82,11 +84,11 @@ namespace Pajn8
             {
                 // John Tukey's ninther
                 int step = (count + 1) / 8;
-                MedianOfThree(keys, ref comparer, values, first + step, first, first + step * 2);
-                MedianOfThree(keys, ref comparer, values, mid - step, mid, mid + step);
-                MedianOfThree(keys, ref comparer, values, last - step * 2, last, last - step);
+                MedianOfThree(keys, values, ref comparer, first + step, first, first + step * 2);
+                MedianOfThree(keys, values, ref comparer, mid - step, mid, mid + step);
+                MedianOfThree(keys, values, ref comparer, last - step * 2, last, last - step);
             }
-            MedianOfThree(keys, ref comparer, values, first, mid, last);
+            MedianOfThree(keys, values, ref comparer, first, mid, last);
 
             TKey pivot;
             {
@@ -159,7 +161,7 @@ namespace Pajn8
             return left;
         }
 
-        private static void MedianOfThree(TKey[] keys, ref TComparer comparer, TValue[] values, int first, int mid, int last)
+        private static void MedianOfThree(TKey[] keys, TValue[] values, ref TComparer comparer, int first, int mid, int last)
         {
             ref TKey firstKey = ref keys[first];
             ref TKey midKey = ref keys[mid];

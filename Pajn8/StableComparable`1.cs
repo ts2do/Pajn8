@@ -24,9 +24,7 @@ namespace Pajn8
             {
                 c = Value.CompareTo(other.Value);
                 if (c == 0)
-                {
                     c = Index - other.Index;
-                }
             }
             return c;
         }

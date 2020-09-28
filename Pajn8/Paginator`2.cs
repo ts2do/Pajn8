@@ -14,6 +14,7 @@ namespace Pajn8
         private readonly T[] items;
         [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain value types")]
         private TComparer comparer;
+        private readonly IComparer<T> boxedComparer;
         private readonly PartitionNode rootNode;
 
         internal override int Length => items.Length;
@@ -26,6 +27,7 @@ namespace Pajn8
 #endif
             this.items = items;
             this.comparer = comparer;
+            boxedComparer = comparer;
             rootNode = new PartitionNode(0, items.Length);
         }
 
@@ -54,7 +56,7 @@ namespace Pajn8
                         p = k > position ? p.LeftNode : p.RightNode;
                     }
 
-                    Array.Sort(items, p.StartIndex, p.Count, comparer);
+                    Array.Sort(items, p.StartIndex, p.Count, boxedComparer);
                     p.IsSorted = true;
                 }
             }
