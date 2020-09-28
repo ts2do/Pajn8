@@ -11,37 +11,24 @@ namespace Pajn8
 #if DEBUG
         private readonly T[] sortedItems;
 #endif
-        private readonly T[] items;
-        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain value types")]
+        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain mutable value types")]
         private TComparer comparer;
         private readonly IComparer<T> boxedComparer;
         private readonly PartitionNode rootNode;
 
-        internal override int Length => items.Length;
-
         internal Paginator(T[] items, TComparer comparer)
+            : base(items)
         {
 #if DEBUG
             sortedItems = items[..];
             Array.Sort(sortedItems, comparer);
 #endif
-            this.items = items;
             this.comparer = comparer;
             boxedComparer = comparer;
             rootNode = new PartitionNode(0, items.Length);
         }
 
-        internal override ArraySegment<T> GetPageInternal(int start, int end, int pageSize)
-        {
-            if (pageSize == 0)
-                return default;
-
-            DivideAndSort(start, end, pageSize);
-
-            return new ArraySegment<T>(items, start, pageSize);
-        }
-
-        private void DivideAndSort(int start, int end, int pageSize)
+        protected override void DivideAndSort(int start, int end, int pageSize)
         {
             PartitionNode p;
             for (int position = start; position < end; position = p.EndIndex)
@@ -68,7 +55,7 @@ namespace Pajn8
 #endif
         }
 
-        private int PickPivotAndPartition(T[] items, ref TComparer comparer, int first, int last)
+        private static int PickPivotAndPartition(T[] items, ref TComparer comparer, int first, int last)
         {
             Debug.Assert(comparer != null);
             Debug.Assert(items.Length > 0);

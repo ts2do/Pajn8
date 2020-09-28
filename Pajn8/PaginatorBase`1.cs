@@ -4,12 +4,16 @@ namespace Pajn8
 {
     internal abstract class PaginatorBase<T> : IPaginator<T>
     {
-        internal abstract int Length { get; }
-        internal abstract ArraySegment<T> GetPageInternal(int start, int end, int pageSize);
+        protected readonly T[] items;
+
+        protected PaginatorBase(T[] items)
+        {
+            this.items = items;
+        }
 
         public ArraySegment<T> GetPage(int offset, int pageSize)
         {
-            int length = Length;
+            int length = items.Length;
             if ((uint)offset >= (uint)length)
                 throw new ArgumentOutOfRangeException(nameof(offset));
             if (pageSize < 0)
@@ -17,7 +21,7 @@ namespace Pajn8
             if ((uint)(offset + pageSize) > (uint)length)
                 throw new ArgumentOutOfRangeException(nameof(pageSize));
 
-            return GetPageInternal(offset, offset + pageSize, pageSize);
+            return GetPageImpl(offset, offset + pageSize, pageSize);
         }
 
         public ArraySegment<T> GetPage(Range range)
@@ -27,21 +31,33 @@ namespace Pajn8
             if ((uint)end > (uint)length || (uint)start > (uint)end)
                 throw new ArgumentOutOfRangeException(nameof(range));
 
-            return GetPageInternal(start, end, end - start);
+            return GetPageImpl(start, end, end - start);
+
+            void ExtractFromRange(Range range, out int length, out int start, out int end)
+            {
+                length = items.Length;
+                Index startIndex = range.Start;
+                start = startIndex.Value;
+                if (startIndex.IsFromEnd)
+                    start = length - start;
+
+                Index endIndex = range.End;
+                end = endIndex.Value;
+                if (endIndex.IsFromEnd)
+                    end = length - end;
+            }
         }
 
-        internal void ExtractFromRange(Range range, out int length, out int start, out int end)
-        {
-            length = Length;
-            Index startIndex = range.Start;
-            start = startIndex.Value;
-            if (startIndex.IsFromEnd)
-                start = length - start;
+        protected abstract void DivideAndSort(int start, int end, int pageSize);
 
-            Index endIndex = range.End;
-            end = endIndex.Value;
-            if (endIndex.IsFromEnd)
-                end = length - end;
+        private ArraySegment<T> GetPageImpl(int start, int end, int pageSize)
+        {
+            if (pageSize == 0)
+                return default;
+
+            DivideAndSort(start, end, pageSize);
+
+            return new ArraySegment<T>(items, start, pageSize);
         }
     }
 }

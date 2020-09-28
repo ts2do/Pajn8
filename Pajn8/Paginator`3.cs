@@ -10,42 +10,27 @@ namespace Pajn8
     {
 #if DEBUG
         private readonly TKey[] sortedKeys;
-        private readonly TValue[] sortedValues;
 #endif
         private readonly TKey[] keys;
-        private readonly TValue[] values;
-        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain value types")]
+        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain mutable value types")]
         private TComparer comparer;
         private readonly IComparer<TKey> boxedComparer;
         private readonly PartitionNode rootNode;
 
-        internal override int Length => keys.Length;
-
         internal Paginator(TKey[] keys, TValue[] values, TComparer comparer)
+            : base(values)
         {
 #if DEBUG
             sortedKeys = keys[..];
-            sortedValues = values[..];
-            Array.Sort(sortedKeys, sortedValues, comparer);
+            Array.Sort(sortedKeys, comparer);
 #endif
             this.keys = keys;
-            this.values = values;
             this.comparer = comparer;
             boxedComparer = comparer;
             rootNode = new PartitionNode(0, keys.Length);
         }
 
-        internal override ArraySegment<TValue> GetPageInternal(int start, int end, int pageSize)
-        {
-            if (pageSize == 0)
-                return default;
-
-            DivideAndSort(start, end, pageSize);
-
-            return new ArraySegment<TValue>(values, start, pageSize);
-        }
-
-        private void DivideAndSort(int start, int end, int pageSize)
+        protected override void DivideAndSort(int start, int end, int pageSize)
         {
             PartitionNode p;
             for (int position = start; position < end; position = p.EndIndex)
@@ -55,12 +40,12 @@ namespace Pajn8
                 {
                     while (end < p.EndIndex - pageSize || start - pageSize > p.StartIndex)
                     {
-                        int k = PickPivotAndPartition(keys, values, ref comparer, p.StartIndex, p.EndIndex - 1);
+                        int k = PickPivotAndPartition(keys, items, ref comparer, p.StartIndex, p.EndIndex - 1);
                         p.Split(k);
                         p = k > position ? p.LeftNode : p.RightNode;
                     }
 
-                    Array.Sort(keys, values, p.StartIndex, p.Count, boxedComparer);
+                    Array.Sort(keys, items, p.StartIndex, p.Count, boxedComparer);
                     p.IsSorted = true;
                 }
             }
@@ -72,7 +57,7 @@ namespace Pajn8
 #endif
         }
 
-        private int PickPivotAndPartition(TKey[] keys, TValue[] values, ref TComparer comparer, int first, int last)
+        private static int PickPivotAndPartition(TKey[] keys, TValue[] items, ref TComparer comparer, int first, int last)
         {
             Debug.Assert(comparer != null);
             Debug.Assert(keys.Length > 0);
@@ -84,11 +69,11 @@ namespace Pajn8
             {
                 // John Tukey's ninther
                 int step = (count + 1) / 8;
-                MedianOfThree(keys, values, ref comparer, first + step, first, first + step * 2);
-                MedianOfThree(keys, values, ref comparer, mid - step, mid, mid + step);
-                MedianOfThree(keys, values, ref comparer, last - step * 2, last, last - step);
+                MedianOfThree(keys, items, ref comparer, first + step, first, first + step * 2);
+                MedianOfThree(keys, items, ref comparer, mid - step, mid, mid + step);
+                MedianOfThree(keys, items, ref comparer, last - step * 2, last, last - step);
             }
-            MedianOfThree(keys, values, ref comparer, first, mid, last);
+            MedianOfThree(keys, items, ref comparer, first, mid, last);
 
             TKey pivot;
             {
@@ -99,9 +84,9 @@ namespace Pajn8
                 key1 = key2;
                 key2 = pivot;
 
-                ref TValue value1 = ref values[mid];
+                ref TValue value1 = ref items[mid];
                 TValue tmpValue = value1;
-                ref TValue value2 = ref values[last - 1];
+                ref TValue value2 = ref items[last - 1];
                 value1 = value2;
                 value2 = tmpValue;
             }
@@ -124,9 +109,9 @@ namespace Pajn8
                     key1 = key2;
                     key2 = tmpKey;
 
-                    ref TValue value1 = ref values[left];
+                    ref TValue value1 = ref items[left];
                     TValue tmpValue = value1;
-                    ref TValue value2 = ref values[right];
+                    ref TValue value2 = ref items[right];
                     value1 = value2;
                     value2 = tmpValue;
                 }
@@ -139,9 +124,9 @@ namespace Pajn8
                 key1 = key2;
                 key2 = pivot;
 
-                ref TValue value1 = ref values[last - 1];
+                ref TValue value1 = ref items[last - 1];
                 TValue tmpValue = value1;
-                ref TValue value2 = ref values[left];
+                ref TValue value2 = ref items[left];
                 value1 = value2;
                 value2 = tmpValue;
             }
@@ -161,14 +146,14 @@ namespace Pajn8
             return left;
         }
 
-        private static void MedianOfThree(TKey[] keys, TValue[] values, ref TComparer comparer, int first, int mid, int last)
+        private static void MedianOfThree(TKey[] keys, TValue[] items, ref TComparer comparer, int first, int mid, int last)
         {
             ref TKey firstKey = ref keys[first];
             ref TKey midKey = ref keys[mid];
             ref TKey lastKey = ref keys[last];
 
-            ref TValue firstValue = ref values[first];
-            ref TValue midValue = ref values[mid];
+            ref TValue firstValue = ref items[first];
+            ref TValue midValue = ref items[mid];
 
             TKey tmpKey;
             TValue tmpValue;
@@ -193,7 +178,7 @@ namespace Pajn8
                     midKey = lastKey;
                     lastKey = tmpKey;
 
-                    ref TValue lastValue = ref values[last];
+                    ref TValue lastValue = ref items[last];
                     tmpValue = midValue;
                     midValue = lastValue;
                     lastValue = tmpValue;

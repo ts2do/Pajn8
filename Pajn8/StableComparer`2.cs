@@ -7,7 +7,7 @@ namespace Pajn8
     internal sealed class StableComparer<T, TComparer> : IComparer<Indexed<T>>
         where TComparer : IComparer<T>
     {
-        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain value types")]
+        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain mutable value types")]
         private TComparer impl;
 
         public StableComparer(TComparer impl)
@@ -16,7 +16,7 @@ namespace Pajn8
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Compare([AllowNull] Indexed<T> x, [AllowNull] Indexed<T> y)
+        public int Compare(Indexed<T> x, Indexed<T> y)
         {
             int c = impl.Compare(x.Value, y.Value);
             if (c == 0)
