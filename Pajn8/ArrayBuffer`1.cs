@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
 namespace Pajn8
 {
     internal struct ArrayBuffer<T>
     {
+        private const int BufferLimit = 1_000_000;
+
         private T[] buf;
         private int bufLength;
         private readonly Node head;
@@ -34,36 +35,17 @@ namespace Pajn8
             Count = 0;
         }
 
-        public void Add(in T value)
-        {
-            if (Count - offset < bufLength)
-            {
-                buf[Count++ - offset] = value;
-                return;
-            }
-
-            AddWithResize(value);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void AddWithResize(in T value)
-        {
-            buf = new T[bufLength *= 2];
-            offset = Count;
-            tail = tail.Next = new Node(buf);
-            buf[Count++ - offset] = value;
-        }
-
         public ref T Add()
         {
             if (Count - offset == bufLength)
             {
-                buf = new T[bufLength *= 2];
+                bufLength = (int)Math.Min((uint)bufLength * 2, BufferLimit);
+                buf = ArrayUtils.AllocateArray<T>(bufLength);
                 offset = Count;
                 tail = tail.Next = new Node(buf);
             }
 
-            return ref buf[Count++ - offset];
+            return ref buf[checked(Count++) - offset];
         }
 
         public T[] ToArray()

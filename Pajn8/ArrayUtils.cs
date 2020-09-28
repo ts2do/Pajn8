@@ -5,11 +5,11 @@ namespace Pajn8
 {
     internal static class ArrayUtils
     {
-        internal static Exception KeysAndValuesLengthMismatch() => new ArgumentException(string.Format(Strings.Argument_MismatchedLength, "keys", "values"));
+        public static Exception KeysAndValuesLengthMismatch() => new ArgumentException(string.Format(Strings.Argument_MismatchedLength, "keys", "values"));
 
-        internal static T[] AllocateArray<T>(int length) => new T[length]; // TODO: Replace with inlined calls to GC.AllocateUninitializedArray
+        public static T[] AllocateArray<T>(int length) => new T[length]; // TODO: Replace with inlined calls to GC.AllocateUninitializedArray
 
-        internal static TIndexed[] ToIndexedArray<T, TIndexed>(this IEnumerable<T> items, int expectedLength)
+        public static TIndexed[] ToIndexedArray<T, TIndexed>(this IEnumerable<T> items, int expectedLength)
             where TIndexed : IIndexed<T>
         {
             return items switch
@@ -43,7 +43,7 @@ namespace Pajn8
             }
         }
 
-        internal static TIndexed[] ToIndexedArray<T, TIndexed>(this T[] items, int expectedLength)
+        public static TIndexed[] ToIndexedArray<T, TIndexed>(this T[] items, int expectedLength)
             where TIndexed : IIndexed<T>
         {
             int length = items.Length;
