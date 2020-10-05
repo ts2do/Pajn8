@@ -8,7 +8,7 @@ The ``Create``, ``CreateStable``, and ``CreateDirect`` method overloads in the `
 ```csharp
 public interface IPaginator<T>
 {
-    ArraySegment<T> GetPage(int offset, int pageSize);
+    ArraySegment<T> GetPage(int offset, int length);
     ArraySegment<T> GetPage(Range range);
 }
 ```

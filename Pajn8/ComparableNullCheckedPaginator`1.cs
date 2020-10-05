@@ -7,12 +7,12 @@ namespace Pajn8
     {
         private readonly Paginator<T, ComparableNullCheckedComparer<T>> impl;
 
-        public ComparableNullCheckedPaginator(T[] items)
+        public ComparableNullCheckedPaginator(T[] items, int offset, int length)
         {
-            impl = new Paginator<T, ComparableNullCheckedComparer<T>>(items, default);
+            impl = new Paginator<T, ComparableNullCheckedComparer<T>>(items, offset, length, default);
         }
 
-        public ArraySegment<T> GetPage(int offset, int pageSize) => impl.GetPage(offset, pageSize); // let impl do argument checks
+        public ArraySegment<T> GetPage(int offset, int length) => impl.GetPage(offset, length); // let impl do argument checks
         public ArraySegment<T> GetPage(Range range) => impl.GetPage(range); // let impl do argument checks
     }
 }

@@ -16,19 +16,19 @@ namespace Pajn8
         private readonly IComparer<T> boxedComparer;
         private readonly PartitionNode rootNode;
 
-        internal Paginator(T[] items, TComparer comparer)
-            : base(items)
+        internal Paginator(T[] items, int offset, int length, TComparer comparer)
+            : base(items, offset, length)
         {
 #if DEBUG
-            sortedItems = items[..];
-            Array.Sort(sortedItems, comparer);
+            sortedItems = (T[])items.Clone();
+            Array.Sort(sortedItems, offset, length, comparer);
 #endif
             this.comparer = comparer;
             boxedComparer = comparer;
-            rootNode = new PartitionNode(0, items.Length);
+            rootNode = new PartitionNode(offset, offset + length);
         }
 
-        protected override void DivideAndSort(int start, int end, int pageSize)
+        protected override void DivideAndSort(int start, int end, int length)
         {
             PartitionNode p;
             for (int position = start; position < end; position = p.EndIndex)
@@ -36,9 +36,21 @@ namespace Pajn8
                 p = rootNode.Find(position);
                 if (!p.IsSorted)
                 {
-                    while (end < p.EndIndex - pageSize || start - pageSize > p.StartIndex)
+                    while (end < p.EndIndex - length || start - length > p.StartIndex)
                     {
                         int k = PickPivotAndPartition(items, ref comparer, p.StartIndex, p.EndIndex - 1);
+#if DEBUG
+                        T pivot = items[k];
+                        T[] lowerItems = items[p.StartIndex..k];
+                        T[] upperKeys = items[(k + 1)..p.EndIndex];
+                        Array.Sort(lowerItems, comparer);
+                        Array.Sort(upperKeys, comparer);
+                        foreach (T x in lowerItems)
+                            Debug.Assert(comparer.Compare(x, pivot) <= 0);
+                        foreach (T x in upperKeys)
+                            Debug.Assert(comparer.Compare(x, pivot) >= 0);
+                        Debug.Assert(comparer.Compare(pivot, sortedItems[k]) == 0);
+#endif
                         p.Split(k);
                         p = k > position ? p.LeftNode : p.RightNode;
                     }
@@ -58,7 +70,7 @@ namespace Pajn8
         private static int PickPivotAndPartition(T[] items, ref TComparer comparer, int first, int last)
         {
             Debug.Assert(comparer != null);
-            Debug.Assert(items.Length > 0);
+            Debug.Assert(first <= last);
 
             int left = first, right = last - 1;
             int count = last - first;
@@ -110,18 +122,6 @@ namespace Pajn8
                 item1 = item2;
                 item2 = pivot;
             }
-
-#if DEBUG
-            T[] lowerItems = items[first..left];
-            T[] upperKeys = items[left..(last + 1)];
-            Array.Sort(lowerItems, comparer);
-            Array.Sort(upperKeys, comparer);
-            foreach (T x in lowerItems)
-                Debug.Assert(comparer.Compare(x, pivot) <= 0);
-            foreach (T x in upperKeys)
-                Debug.Assert(comparer.Compare(x, pivot) >= 0);
-            Debug.Assert(comparer.Compare(pivot, sortedItems[left]) == 0);
-#endif
 
             return left;
         }

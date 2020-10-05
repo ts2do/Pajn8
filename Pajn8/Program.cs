@@ -23,7 +23,7 @@ namespace Pajn8
             var sw = new Stopwatch();
 
             // Generate 20 "random" pages
-            var paginator = new ComparableNullUncheckedPaginator<int, (int, int)>(keys[..], values[..]);
+            var paginator = Paginator.CreateDirect(keys[..], values[..]);
             random = new Random(10);
             sw.Start();
             for (int i = 0; i < 20; ++i)
@@ -32,7 +32,7 @@ namespace Pajn8
             Console.WriteLine(sw.ElapsedMilliseconds);
 
             // Generate the first 100 pages
-            paginator = new ComparableNullUncheckedPaginator<int, (int, int)>(keys[..], values[..]);
+            paginator = Paginator.CreateDirect(keys[..], values[..]);
             sw.Restart();
             for (int i = 0; i < 100; ++i)
                 paginator.GetPage(i * 10, 10);
