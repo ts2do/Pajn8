@@ -117,11 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Argument_MismatchedLength" xml:space="preserve">
-    <value>"{0}" and "{1}" must contain the same number of elements.</value>
+  <data name="Arg_ArrayTooShortForOffsetAndLength" xml:space="preserve">
+    <value>Array is too short for given offset and length.</value>
   </data>
   <data name="Arg_BogusIComparer" xml:space="preserve">
     <value>Unable to sort because the IComparer.Compare() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results. IComparer: '{0}'.</value>
+  </data>
+  <data name="Arg_MismatchedLength" xml:space="preserve">
+    <value>"{0}" and "{1}" must contain the same number of elements.</value>
   </data>
   <data name="InvalidOperation_IComparerFailed" xml:space="preserve">
     <value>Failed to compare two elements in the array.</value>

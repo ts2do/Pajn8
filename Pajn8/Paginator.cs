@@ -43,7 +43,7 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (items.Length < length + offset) throw new ArgumentException(nameof(items) + " array shorter than expected", nameof(items));
+            if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
             if (default(T) == null)
                 return new ComparableNullCheckedPaginator<T>(items, offset, length);
             else
@@ -88,7 +88,7 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (items.Length < length + offset) throw new ArgumentException(nameof(items) + " array shorter than expected", nameof(items));
+            if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
             return new Paginator<T, TComparer>(items, offset, length, comparer);
         }
@@ -137,8 +137,8 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (keys.Length < length + offset) throw new ArgumentException(nameof(keys) + " array shorter than expected", nameof(keys));
-            if (values.Length < length + offset) throw new ArgumentException(nameof(values) + " array shorter than expected", nameof(values));
+            if (keys.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(keys));
+            if (values.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(values));
             if (default(TKey) == null)
                 return new ComparableNullCheckedPaginator<TKey, TValue>(keys, values, 0, length);
             else
@@ -192,8 +192,8 @@ namespace Pajn8
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (keys.Length < length + offset) throw new ArgumentException(nameof(keys) + " array shorter than expected", nameof(keys));
-            if (values.Length < length + offset) throw new ArgumentException(nameof(values) + " array shorter than expected", nameof(values));
+            if (keys.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(keys));
+            if (values.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(values));
             return new Paginator<TKey, TValue, TComparer>(keys, values, offset, length, comparer);
         }
         #endregion
@@ -236,7 +236,7 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (items.Length < length + offset) throw new ArgumentException(nameof(items) + " array shorter than expected", nameof(items));
+            if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
             return new ComparableNullUncheckedPaginator<T>(items, offset, length);
         }
 
@@ -285,8 +285,8 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (keys.Length < length + offset) throw new ArgumentException(nameof(keys) + " array shorter than expected", nameof(keys));
-            if (values.Length < length + offset) throw new ArgumentException(nameof(values) + " array shorter than expected", nameof(values));
+            if (keys.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(keys));
+            if (values.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(values));
             return new ComparableNullUncheckedPaginator<TKey, TValue>(keys, values, 0, length);
         }
         #endregion

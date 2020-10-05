@@ -61,6 +61,15 @@ namespace Pajn8 {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Array is too short for given offset and length..
+        /// </summary>
+        internal static string Arg_ArrayTooShortForOffsetAndLength {
+            get {
+                return ResourceManager.GetString("Arg_ArrayTooShortForOffsetAndLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to sort because the IComparer.Compare() method returns inconsistent results. Either a value does not compare equal to itself, or one value repeatedly compared to another value yields different results. IComparer: &apos;{0}&apos;..
         /// </summary>
         internal static string Arg_BogusIComparer {
@@ -72,9 +81,9 @@ namespace Pajn8 {
         /// <summary>
         ///   Looks up a localized string similar to &quot;{0}&quot; and &quot;{1}&quot; must contain the same number of elements..
         /// </summary>
-        internal static string Argument_MismatchedLength {
+        internal static string Arg_MismatchedLength {
             get {
-                return ResourceManager.GetString("Argument_MismatchedLength", resourceCulture);
+                return ResourceManager.GetString("Arg_MismatchedLength", resourceCulture);
             }
         }
         

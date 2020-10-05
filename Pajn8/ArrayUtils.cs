@@ -5,7 +5,7 @@ namespace Pajn8
 {
     internal static class ArrayUtils
     {
-        public static Exception KeysAndValuesLengthMismatch() => new ArgumentException(string.Format(Strings.Argument_MismatchedLength, "keys", "values"));
+        public static Exception KeysAndValuesLengthMismatch() => new ArgumentException(string.Format(Strings.Arg_MismatchedLength, "keys", "values"));
 
         public static T[] AllocateArray<T>(int length) => new T[length]; // TODO: Replace with inlined calls to GC.AllocateUninitializedArray
 
