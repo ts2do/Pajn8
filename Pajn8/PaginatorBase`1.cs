@@ -8,6 +8,8 @@ namespace Pajn8
         protected readonly int offset;
         protected readonly int length;
 
+        public int Count => length;
+
         protected PaginatorBase(T[] items, int offset, int length)
         {
             this.items = items;

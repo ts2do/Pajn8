@@ -61,6 +61,15 @@ namespace Pajn8 {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &quot;{0}&quot; and &quot;{1}&quot; must be distinct arrays..
+        /// </summary>
+        internal static string Arg_ArraysMustBeDifferent {
+            get {
+                return ResourceManager.GetString("Arg_ArraysMustBeDifferent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Array is too short for given offset and length..
         /// </summary>
         internal static string Arg_ArrayTooShortForOffsetAndLength {
@@ -93,6 +102,15 @@ namespace Pajn8 {
         internal static string InvalidOperation_IComparerFailed {
             get {
                 return ResourceManager.GetString("InvalidOperation_IComparerFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This instance is in an invalid state because a prior invocation of GetPage resulted in an exception..
+        /// </summary>
+        internal static string InvalidOperation_PaginatorFaulted {
+            get {
+                return ResourceManager.GetString("InvalidOperation_PaginatorFaulted", resourceCulture);
             }
         }
     }

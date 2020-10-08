@@ -7,6 +7,8 @@ namespace Pajn8
     {
         private readonly Paginator<TKey, TValue, ComparableNullUncheckedComparer<TKey>> impl;
 
+        public int Count => impl.Count;
+
         public ComparableNullUncheckedPaginator(TKey[] keys, TValue[] values, int offset, int length)
         {
             impl = new Paginator<TKey, TValue, ComparableNullUncheckedComparer<TKey>>(keys, values, offset, length, default);

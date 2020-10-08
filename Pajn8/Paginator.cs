@@ -20,7 +20,7 @@ namespace Pajn8
             where T : IComparable<T>
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
-            if (default(T) == null)
+            if (default(T) is null)
                 return new ComparableNullCheckedPaginator<T>(items, 0, items.Length);
             else
                 return new ComparableNullUncheckedPaginator<T>(items, 0, items.Length);
@@ -44,7 +44,7 @@ namespace Pajn8
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
-            if (default(T) == null)
+            if (default(T) is null)
                 return new ComparableNullCheckedPaginator<T>(items, offset, length);
             else
                 return new ComparableNullUncheckedPaginator<T>(items, offset, length);
@@ -111,34 +111,8 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             int length = keys.Length;
             if (length != values.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
-            if (default(TKey) == null)
-                return new ComparableNullCheckedPaginator<TKey, TValue>(keys, values, 0, length);
-            else
-                return new ComparableNullUncheckedPaginator<TKey, TValue>(keys, values, 0, length);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="IPaginator{T}"/> instance which operates directly on a range in <paramref name="keys"/> and <paramref name="values"/>.
-        /// </summary>
-        /// <remarks>
-        /// Sorting will be done in the order defined by the <see cref="IComparable{T}"/> implementation of <typeparamref name="TKey"/>.
-        /// </remarks>
-        /// <typeparam name="TKey">Type of keys on which to sort</typeparam>
-        /// <typeparam name="TValue">Type of values associated with the keys</typeparam>
-        /// <param name="keys">Keys on which to sort</param>
-        /// <param name="values">Values associated with the keys</param>
-        /// <param name="offset">Offset of range in arrays</param>
-        /// <param name="length">Length of range in arrays</param>
-        /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<TValue> CreateDirect<TKey, TValue>(TKey[] keys, TValue[] values, int offset, int length)
-            where TKey : IComparable<TKey>
-        {
-            if (keys is null) throw new ArgumentNullException(nameof(keys));
-            if (values is null) throw new ArgumentNullException(nameof(values));
-            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (keys.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(keys));
-            if (values.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(values));
+            if (ReferenceEquals(keys, values) && length > 0)
+                throw new ArgumentException(string.Format(Strings.Arg_ArraysMustBeDifferent, nameof(keys), nameof(values)));
             if (default(TKey) == null)
                 return new ComparableNullCheckedPaginator<TKey, TValue>(keys, values, 0, length);
             else
@@ -166,35 +140,9 @@ namespace Pajn8
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
             int length = keys.Length;
             if (length != values.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
+            if (ReferenceEquals(keys, values) && length > 0)
+                throw new ArgumentException(string.Format(Strings.Arg_ArraysMustBeDifferent, nameof(keys), nameof(values)));
             return new Paginator<TKey, TValue, TComparer>(keys, values, 0, length, comparer);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="IPaginator{T}"/> instance which operates directly on a range in <paramref name="keys"/> and <paramref name="values"/>.
-        /// </summary>
-        /// <remarks>
-        /// Sorting will be done in the order defined by <paramref name="comparer"/>.
-        /// </remarks>
-        /// <typeparam name="TKey">Type of keys on which to sort</typeparam>
-        /// <typeparam name="TValue">Type of values associated with the keys</typeparam>
-        /// <typeparam name="TComparer">Type of comparer by which to sort</typeparam>
-        /// <param name="keys">Keys on which to sort</param>
-        /// <param name="values">Values associated with the keys</param>
-        /// <param name="offset">Offset of range in arrays</param>
-        /// <param name="length">Length of range in arrays</param>
-        /// <param name="comparer">Comparer by which to sort</param>
-        /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<TValue> CreateDirect<TKey, TValue, TComparer>(TKey[] keys, TValue[] values, int offset, int length, TComparer comparer)
-            where TComparer : IComparer<TKey>
-        {
-            if (keys is null) throw new ArgumentNullException(nameof(keys));
-            if (values is null) throw new ArgumentNullException(nameof(values));
-            if (comparer is null) throw new ArgumentNullException(nameof(comparer));
-            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (keys.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(keys));
-            if (values.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(values));
-            return new Paginator<TKey, TValue, TComparer>(keys, values, offset, length, comparer);
         }
         #endregion
 
@@ -260,33 +208,8 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             int length = keys.Length;
             if (length != values.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
-            return new ComparableNullUncheckedPaginator<TKey, TValue>(keys, values, 0, length);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="IPaginator{T}"/> instance which operates directly on a range in <paramref name="keys"/> and <paramref name="values"/>.
-        /// </summary>
-        /// <remarks>
-        /// Sorting will be done in the order defined by the <see cref="IComparable{T}"/> implementation of <typeparamref name="TKey"/>.
-        /// Elements in <paramref name="keys"/> will be assumed to be non-null.
-        /// Prefer calling <see cref="CreateDirect{TKey, TValue}(TKey[], TValue[])"/> if <typeparamref name="TKey"/> is known to be a non-nullable type.
-        /// </remarks>
-        /// <typeparam name="TKey">Type of keys on which to sort</typeparam>
-        /// <typeparam name="TValue">Type of values associated with the keys</typeparam>
-        /// <param name="keys">Keys on which to sort</param>
-        /// <param name="values">Values associated with the keys</param>
-        /// <param name="offset">Offset of range in arrays</param>
-        /// <param name="length">Length of range in arrays</param>
-        /// <returns>The <see cref="IPaginator{T}"/> instance</returns>
-        public static IPaginator<TValue> CreateDirectNoNulls<TKey, TValue>(TKey[] keys, TValue[] values, int offset, int length)
-            where TKey : IComparable<TKey>
-        {
-            if (keys is null) throw new ArgumentNullException(nameof(keys));
-            if (values is null) throw new ArgumentNullException(nameof(values));
-            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            if (keys.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(keys));
-            if (values.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(values));
+            if (ReferenceEquals(keys, values) && length > 0)
+                throw new ArgumentException(string.Format(Strings.Arg_ArraysMustBeDifferent, nameof(keys), nameof(values)));
             return new ComparableNullUncheckedPaginator<TKey, TValue>(keys, values, 0, length);
         }
         #endregion
@@ -306,7 +229,7 @@ namespace Pajn8
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] itemArray = items.ToArray();
-            if (default(T) == null)
+            if (default(T) is null)
                 return new ComparableNullCheckedPaginator<T>(itemArray, 0, itemArray.Length);
             else
                 return new ComparableNullUncheckedPaginator<T>(itemArray, 0, itemArray.Length);
@@ -517,7 +440,7 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] values = items.ToArray();
             int length = values.Length;
-            if (default(T) == null)
+            if (default(T) is null)
                 return new ComparableNullUncheckedPaginator<StableNullCheckedComparable<T>, T>(
                     values.ToIndexedArray<T, StableNullCheckedComparable<T>>(length), values, 0, length);
             else

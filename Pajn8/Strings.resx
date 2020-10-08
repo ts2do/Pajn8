@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Arg_ArraysMustBeDifferent" xml:space="preserve">
+    <value>"{0}" and "{1}" must be distinct arrays.</value>
+  </data>
   <data name="Arg_ArrayTooShortForOffsetAndLength" xml:space="preserve">
     <value>Array is too short for given offset and length.</value>
   </data>
@@ -128,5 +131,8 @@
   </data>
   <data name="InvalidOperation_IComparerFailed" xml:space="preserve">
     <value>Failed to compare two elements in the array.</value>
+  </data>
+  <data name="InvalidOperation_PaginatorFaulted" xml:space="preserve">
+    <value>This instance is in an invalid state because a prior invocation of GetPage resulted in an exception.</value>
   </data>
 </root>
