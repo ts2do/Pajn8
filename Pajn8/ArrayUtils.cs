@@ -9,22 +9,21 @@ namespace Pajn8
 
         public static T[] AllocateArray<T>(int length) => new T[length]; // TODO: Replace with inlined calls to GC.AllocateUninitializedArray
 
-        public static TIndexed[] ToIndexedArray<T, TIndexed>(this IEnumerable<T> items, int expectedLength)
-            where TIndexed : IIndexed<T>
+        public static Indexed<T>[] ToIndexedArray<T>(this IEnumerable<T> items, int expectedLength)
         {
             return items switch
             {
-                T[] x => x.ToIndexedArray<T, TIndexed>(expectedLength),
+                T[] x => x.ToIndexedArray(expectedLength),
                 List<T> x => CreateFromList(x, expectedLength),
                 _ => CreateFromEnumerable(items, expectedLength)
             };
 
-            static TIndexed[] CreateFromList(List<T> list, int expectedLength)
+            static Indexed<T>[] CreateFromList(List<T> list, int expectedLength)
             {
                 using List<T>.Enumerator enumerator = list.GetEnumerator();
                 int length = list.Count;
                 if (length != expectedLength) throw KeysAndValuesLengthMismatch();
-                var indexedKeys = AllocateArray<TIndexed>(length);
+                var indexedKeys = AllocateArray<Indexed<T>>(length);
                 for (int i = 0; i < length; ++i)
                 {
                     enumerator.MoveNext(); // Enforced by comodification checks
@@ -33,9 +32,9 @@ namespace Pajn8
                 return indexedKeys;
             }
 
-            static TIndexed[] CreateFromEnumerable(IEnumerable<T> enumerable, int expectedLength)
+            static Indexed<T>[] CreateFromEnumerable(IEnumerable<T> enumerable, int expectedLength)
             {
-                var buffer = new ArrayBuffer<TIndexed>(16);
+                var buffer = new ArrayBuffer<Indexed<T>>(16);
                 foreach (var key in enumerable)
                     buffer.Add().Set(key, buffer.Count);
                 if (buffer.Count != expectedLength) throw KeysAndValuesLengthMismatch();
@@ -43,12 +42,11 @@ namespace Pajn8
             }
         }
 
-        public static TIndexed[] ToIndexedArray<T, TIndexed>(this T[] items, int expectedLength)
-            where TIndexed : IIndexed<T>
+        public static Indexed<T>[] ToIndexedArray<T>(this T[] items, int expectedLength)
         {
             int length = items.Length;
             if (length != expectedLength) throw KeysAndValuesLengthMismatch();
-            var indexedKeys = AllocateArray<TIndexed>(length);
+            var indexedKeys = AllocateArray<Indexed<T>>(length);
             for (int i = 0; i < length; ++i)
                 indexedKeys[i].Set(items[i], i);
             return indexedKeys;

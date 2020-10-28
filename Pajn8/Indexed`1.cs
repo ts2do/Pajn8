@@ -1,14 +1,14 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Pajn8
 {
-    internal struct Indexed<T> : IIndexed<T>
+    internal struct Indexed<T>
     {
+        [AllowNull]
         public T Value;
         public int Index;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(T value, int index)
+        public void Set([AllowNull] T value, int index)
         {
             Value = value;
             Index = index;

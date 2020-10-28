@@ -21,9 +21,9 @@ namespace Pajn8
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
             if (default(T) is null)
-                return new ComparableNullCheckedPaginator<T>(items, 0, items.Length);
+                return CreateImpl(items, 0, items.Length, default(ComparableNullCheckedComparer<T>));
             else
-                return new ComparableNullUncheckedPaginator<T>(items, 0, items.Length);
+                return CreateImpl(items, 0, items.Length, default(ComparableNullUncheckedComparer<T>));
         }
 
         /// <summary>
@@ -45,9 +45,9 @@ namespace Pajn8
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
             if (default(T) is null)
-                return new ComparableNullCheckedPaginator<T>(items, offset, length);
+                return CreateImpl(items, offset, length, default(ComparableNullCheckedComparer<T>));
             else
-                return new ComparableNullUncheckedPaginator<T>(items, offset, length);
+                return CreateImpl(items, offset, length, default(ComparableNullUncheckedComparer<T>));
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Pajn8
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
-            return new Paginator<T, TComparer>(items, 0, items.Length, comparer);
+            return CreateImpl(items, 0, items.Length, comparer);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Pajn8
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
-            return new Paginator<T, TComparer>(items, offset, length, comparer);
+            return CreateImpl(items, offset, length, comparer);
         }
 
         /// <summary>
@@ -113,10 +113,10 @@ namespace Pajn8
             if (length != values.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
             if (ReferenceEquals(keys, values) && length > 0)
                 throw new ArgumentException(string.Format(Strings.Arg_ArraysMustBeDifferent, nameof(keys), nameof(values)));
-            if (default(TKey) == null)
-                return new ComparableNullCheckedPaginator<TKey, TValue>(keys, values, 0, length);
+            if (default(TKey) is null)
+                return CreateImpl(keys, values, 0, length, default(ComparableNullCheckedComparer<TKey>));
             else
-                return new ComparableNullUncheckedPaginator<TKey, TValue>(keys, values, 0, length);
+                return CreateImpl(keys, values, 0, length, default(ComparableNullUncheckedComparer<TKey>));
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Pajn8
             if (length != values.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
             if (ReferenceEquals(keys, values) && length > 0)
                 throw new ArgumentException(string.Format(Strings.Arg_ArraysMustBeDifferent, nameof(keys), nameof(values)));
-            return new Paginator<TKey, TValue, TComparer>(keys, values, 0, length, comparer);
+            return CreateImpl(keys, values, 0, length, comparer);
         }
         #endregion
 
@@ -162,7 +162,7 @@ namespace Pajn8
             where T : IComparable<T>
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
-            return new ComparableNullUncheckedPaginator<T>(items, 0, items.Length);
+            return CreateImpl(items, 0, items.Length, default(ComparableNullUncheckedComparer<T>));
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Pajn8
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (items.Length < length + offset) throw new ArgumentException(Strings.Arg_ArrayTooShortForOffsetAndLength, nameof(items));
-            return new ComparableNullUncheckedPaginator<T>(items, offset, length);
+            return CreateImpl(items, offset, length, default(ComparableNullUncheckedComparer<T>));
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace Pajn8
             if (length != values.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
             if (ReferenceEquals(keys, values) && length > 0)
                 throw new ArgumentException(string.Format(Strings.Arg_ArraysMustBeDifferent, nameof(keys), nameof(values)));
-            return new ComparableNullUncheckedPaginator<TKey, TValue>(keys, values, 0, length);
+            return CreateImpl(keys, values, 0, length, default(ComparableNullUncheckedComparer<TKey>));
         }
         #endregion
 
@@ -230,9 +230,9 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] itemArray = items.ToArray();
             if (default(T) is null)
-                return new ComparableNullCheckedPaginator<T>(itemArray, 0, itemArray.Length);
+                return CreateImpl(itemArray, 0, itemArray.Length, default(ComparableNullCheckedComparer<T>));
             else
-                return new ComparableNullUncheckedPaginator<T>(itemArray, 0, itemArray.Length);
+                return CreateImpl(itemArray, 0, itemArray.Length, default(ComparableNullUncheckedComparer<T>));
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
             T[] itemArray = items.ToArray();
-            return new Paginator<T, TComparer>(itemArray, 0, itemArray.Length, comparer);
+            return CreateImpl(itemArray, 0, itemArray.Length, comparer);
         }
 
         /// <summary>
@@ -275,10 +275,10 @@ namespace Pajn8
             TValue[] valueArray = values.ToArray();
             int length = keyArray.Length;
             if (length != valueArray.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
-            if (default(TKey) == null)
-                return new ComparableNullCheckedPaginator<TKey, TValue>(keyArray, valueArray, 0, length);
+            if (default(TKey) is null)
+                return CreateImpl(keyArray, valueArray, 0, length, default(ComparableNullCheckedComparer<TKey>));
             else
-                return new ComparableNullUncheckedPaginator<TKey, TValue>(keyArray, valueArray, 0, length);
+                return CreateImpl(keyArray, valueArray, 0, length, default(ComparableNullUncheckedComparer<TKey>));
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Pajn8
             TValue[] valueArray = values.ToArray();
             int length = keyArray.Length;
             if (length != valueArray.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
-            return new Paginator<TKey, TValue, TComparer>(keyArray, valueArray, 0, length, comparer);
+            return CreateImpl(keyArray, valueArray, 0, length, comparer);
         }
 
         /// <summary>
@@ -324,10 +324,11 @@ namespace Pajn8
         {
             if (values is null) throw new ArgumentNullException(nameof(values));
             if (keySelector is null) throw new ArgumentNullException(nameof(keySelector));
-            if (default(TKey) == null)
-                return CreateImpl(values.ToArray(), keySelector, default(ComparableNullCheckedComparer<TKey>));
+            TValue[] valueArray = values.ToArray();
+            if (default(TKey) is null)
+                return CreateImpl(valueArray, keySelector, default(ComparableNullCheckedComparer<TKey>));
             else
-                return CreateImpl(values.ToArray(), keySelector, default(ComparableNullUncheckedComparer<TKey>));
+                return CreateImpl(valueArray, keySelector, default(ComparableNullUncheckedComparer<TKey>));
         }
 
         /// <summary>
@@ -371,7 +372,7 @@ namespace Pajn8
         {
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] itemArray = items.ToArray();
-            return new ComparableNullUncheckedPaginator<T>(itemArray, 0, itemArray.Length);
+            return CreateImpl(itemArray, 0, itemArray.Length, default(ComparableNullUncheckedComparer<T>));
         }
 
         /// <summary>
@@ -397,7 +398,7 @@ namespace Pajn8
             TValue[] valueArray = values.ToArray();
             int length = keyArray.Length;
             if (length != valueArray.Length) throw ArrayUtils.KeysAndValuesLengthMismatch();
-            return new ComparableNullUncheckedPaginator<TKey, TValue>(keyArray, valueArray, 0, length);
+            return CreateImpl(keyArray, valueArray, 0, length, default(ComparableNullUncheckedComparer<TKey>));
         }
 
         /// <summary>
@@ -440,12 +441,11 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] values = items.ToArray();
             int length = values.Length;
+            Indexed<T>[] keys = values.ToIndexedArray(length);
             if (default(T) is null)
-                return new ComparableNullUncheckedPaginator<StableNullCheckedComparable<T>, T>(
-                    values.ToIndexedArray<T, StableNullCheckedComparable<T>>(length), values, 0, length);
+                return CreateImpl(keys, values, 0, length, default(StableNullCheckedComparableComparer<T>));
             else
-                return new ComparableNullUncheckedPaginator<StableNullUncheckedComparable<T>, T>(
-                    values.ToIndexedArray<T, StableNullUncheckedComparable<T>>(length), values, 0, length);
+                return CreateImpl(keys, values, 0, length, default(StableNullUncheckedComparableComparer<T>));
         }
 
         /// <summary>
@@ -466,8 +466,7 @@ namespace Pajn8
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
             T[] values = items.ToArray();
             int length = values.Length;
-            return new Paginator<Indexed<T>, T, StableComparer<T, TComparer>>(
-                values.ToIndexedArray<T, Indexed<T>>(length), values, 0, length, new StableComparer<T, TComparer>(comparer));
+            return CreateImpl(values.ToIndexedArray(length), values, 0, length, new StableComparer<T, TComparer>(comparer));
         }
 
         /// <summary>
@@ -488,12 +487,11 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             TValue[] valueArray = values.ToArray();
             int length = valueArray.Length;
-            if (default(TKey) == null)
-                return new ComparableNullUncheckedPaginator<StableNullCheckedComparable<TKey>, TValue>(
-                    keys.ToIndexedArray<TKey, StableNullCheckedComparable<TKey>>(length), valueArray, 0, length);
+            Indexed<TKey>[] indexedKeys = keys.ToIndexedArray(length);
+            if (default(TKey) is null)
+                return CreateImpl(indexedKeys, valueArray, 0, length, default(StableNullCheckedComparableComparer<TKey>));
             else
-                return new ComparableNullUncheckedPaginator<StableNullUncheckedComparable<TKey>, TValue>(
-                    keys.ToIndexedArray<TKey, StableNullUncheckedComparable<TKey>>(length), valueArray, 0, length);
+                return CreateImpl(indexedKeys, valueArray, 0, length, default(StableNullUncheckedComparableComparer<TKey>));
         }
 
         /// <summary>
@@ -517,8 +515,7 @@ namespace Pajn8
             if (comparer is null) throw new ArgumentNullException(nameof(comparer));
             TValue[] valueArray = values.ToArray();
             int length = valueArray.Length;
-            return new Paginator<Indexed<TKey>, TValue, StableComparer<TKey, TComparer>>(
-                keys.ToIndexedArray<TKey, Indexed<TKey>>(length), valueArray, 0, length, new StableComparer<TKey, TComparer>(comparer));
+            return CreateImpl(keys.ToIndexedArray(length), valueArray, 0, length, new StableComparer<TKey, TComparer>(comparer));
         }
 
         /// <summary>
@@ -539,10 +536,10 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             if (keySelector is null) throw new ArgumentNullException(nameof(keySelector));
             TValue[] valueArray = values.ToArray();
-            if (default(TKey) == null)
-                return CreateImpl<TKey, TValue, StableNullCheckedComparable<TKey>>(valueArray, keySelector);
+            if (default(TKey) is null)
+                return CreateStableImpl(valueArray, keySelector, default(StableNullCheckedComparableComparer<TKey>));
             else
-                return CreateImpl<TKey, TValue, StableNullUncheckedComparable<TKey>>(valueArray, keySelector);
+                return CreateStableImpl(valueArray, keySelector, default(StableNullUncheckedComparableComparer<TKey>));
         }
 
         /// <summary>
@@ -570,8 +567,7 @@ namespace Pajn8
             var keys = ArrayUtils.AllocateArray<Indexed<TKey>>(length);
             for (int i = 0; i < length; ++i)
                 keys[i].Set(keySelector(valueArray[i]), i);
-            return new Paginator<Indexed<TKey>, TValue, StableComparer<TKey, TComparer>>(
-                keys, valueArray, 0, length, new StableComparer<TKey, TComparer>(comparer));
+            return CreateImpl(keys, valueArray, 0, length, new StableComparer<TKey, TComparer>(comparer));
         }
         #endregion
 
@@ -593,8 +589,7 @@ namespace Pajn8
             if (items is null) throw new ArgumentNullException(nameof(items));
             T[] itemArray = items.ToArray();
             int length = itemArray.Length;
-            return new ComparableNullUncheckedPaginator<StableNullUncheckedComparable<T>, T>(
-                itemArray.ToIndexedArray<T, StableNullUncheckedComparable<T>>(length), itemArray, 0, length);
+            return CreateImpl(itemArray.ToIndexedArray(length), itemArray, 0, length, default(StableNullUncheckedComparableComparer<T>));
         }
 
         /// <summary>
@@ -618,8 +613,7 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             TValue[] valueArray = values.ToArray();
             int length = valueArray.Length;
-            return new ComparableNullUncheckedPaginator<StableNullUncheckedComparable<TKey>, TValue>(
-                keys.ToIndexedArray<TKey, StableNullUncheckedComparable<TKey>>(length), valueArray, 0, length);
+            return CreateImpl(keys.ToIndexedArray(length), valueArray, 0, length, default(StableNullUncheckedComparableComparer<TKey>));
         }
 
         /// <summary>
@@ -643,11 +637,19 @@ namespace Pajn8
             if (values is null) throw new ArgumentNullException(nameof(values));
             if (keySelector is null) throw new ArgumentNullException(nameof(keySelector));
             TValue[] valueArray = values.ToArray();
-            return CreateImpl<TKey, TValue, StableNullUncheckedComparable<TKey>>(valueArray, keySelector);
+            return CreateStableImpl(valueArray, keySelector, default(StableNullUncheckedComparableComparer<TKey>));
         }
         #endregion
 
         #region Implementation
+        private static Paginator<T, TComparer> CreateImpl<T, TComparer>(T[] items, int offset, int length, in TComparer comparer)
+            where TComparer : IComparer<T>
+            => new Paginator<T, TComparer>(items, offset, length, comparer);
+
+        private static Paginator<TKey, TValue, TComparer> CreateImpl<TKey, TValue, TComparer>(TKey[] keys, TValue[] values, int offset, int length, in TComparer comparer)
+            where TComparer : IComparer<TKey>
+            => new Paginator<TKey, TValue, TComparer>(keys, values, offset, length, comparer);
+
         private static IPaginator<TValue> CreateImpl<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
             where TComparer : IComparer<TKey>
         {
@@ -658,15 +660,14 @@ namespace Pajn8
             return new Paginator<TKey, TValue, TComparer>(keys, values, 0, length, comparer);
         }
 
-        private static IPaginator<TValue> CreateImpl<TKey, TValue, TStableComparable>(TValue[] values, Func<TValue, TKey> keySelector)
-            where TKey : IComparable<TKey>
-            where TStableComparable : IIndexed<TKey>, IComparable<TStableComparable>
+        private static IPaginator<TValue> CreateStableImpl<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
+            where TComparer : IComparer<Indexed<TKey>>
         {
             int length = values.Length;
-            var keys = ArrayUtils.AllocateArray<TStableComparable>(length);
+            var keys = ArrayUtils.AllocateArray<Indexed<TKey>>(length);
             for (int i = 0; i < length; ++i)
                 keys[i].Set(keySelector(values[i]), i);
-            return new Paginator<TStableComparable, TValue, ComparableNullUncheckedComparer<TStableComparable>>(keys, values, 0, length, default);
+            return new Paginator<Indexed<TKey>, TValue, TComparer>(keys, values, 0, length, comparer);
         }
         #endregion
     }
