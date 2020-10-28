@@ -9,6 +9,14 @@ namespace Pajn8
         where TKey : IComparable<TKey>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Compare([AllowNull] TKey x, [AllowNull] TKey y) => x?.CompareTo(y) ?? (y is null ? 0 : -1);
+        public int Compare([AllowNull] TKey x, [AllowNull] TKey y)
+        {
+            int c = 0;
+            if (!(x is null))
+                c = x.CompareTo(y);
+            else if (!(y is null))
+                c = -y.CompareTo(x);
+            return c;
+        }
     }
 }

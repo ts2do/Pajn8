@@ -14,7 +14,7 @@ namespace Pajn8
             if (!(x.Value is null))
                 c = x.Value.CompareTo(y.Value);
             else if (!(y.Value is null))
-                c = y.Value.CompareTo(x.Value);
+                c = -y.Value.CompareTo(x.Value);
             if (c == 0)
                 c = x.Index - y.Index;
             return c;
