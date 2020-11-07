@@ -9,15 +9,17 @@ namespace Pajn8
         public bool IsSorted { get; set; }
         public PartitionNode LeftNode { get; private set; }
         public PartitionNode RightNode { get; private set; }
+        public int Depth { get; }
 
         public int Count => EndIndex - StartIndex;
 
         private int splitIndex = -1;
 
-        public PartitionNode(int startIndex, int endIndex)
+        public PartitionNode(int startIndex, int endIndex, int depth)
         {
             StartIndex = startIndex;
             EndIndex = endIndex;
+            Depth = depth;
         }
 
         public PartitionNode Find(int index)
@@ -40,8 +42,8 @@ namespace Pajn8
             Debug.Assert(this.splitIndex < 0 && LeftNode == null && RightNode == null);
 
             this.splitIndex = splitIndex;
-            LeftNode = new PartitionNode(StartIndex, splitIndex);
-            RightNode = new PartitionNode(splitIndex, EndIndex);
+            LeftNode = new PartitionNode(StartIndex, splitIndex, Depth + 1);
+            RightNode = new PartitionNode(splitIndex, EndIndex, Depth + 1);
         }
     }
 }

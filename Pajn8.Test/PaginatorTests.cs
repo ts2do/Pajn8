@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
@@ -73,6 +74,31 @@ namespace Pajn8.Test
         }
 
         [Fact]
+        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
+        public void NullChecksNullable()
+        {
+            int?[] nullArray = null, validArray = Array.Empty<int?>();
+            Func<int?, int?> nullKeySelector = null, validKeySelector = x => x;
+
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateDirect<int>(nullArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateDirect<int>(nullArray, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateDirect<int, int?>(nullArray, validArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateDirect<int, int?>(validArray, nullArray));
+
+            Assert.Throws<ArgumentNullException>(() => Paginator.Create<int>(nullArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.Create<int, int?>(nullArray, validArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.Create<int, int?>(validArray, nullArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.Create<int, int?>(nullArray, validKeySelector));
+            Assert.Throws<ArgumentNullException>(() => Paginator.Create<int, int?>(validArray, nullKeySelector));
+
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateStable<int>(nullArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateStable<int, int?>(nullArray, validArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateStable<int, int?>(validArray, nullArray));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateStable<int, int?>(nullArray, validKeySelector));
+            Assert.Throws<ArgumentNullException>(() => Paginator.CreateStable<int, int?>(validArray, nullKeySelector));
+        }
+
+        [Fact]
         public void BasicRangeChecks()
         {
             var array = Array.Empty<string>();
@@ -88,6 +114,16 @@ namespace Pajn8.Test
         }
 
         [Fact]
+        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
+        public void BasicRangeChecksNullable()
+        {
+            var array = Array.Empty<int?>();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => Paginator.CreateDirect<int>(array, -1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Paginator.CreateDirect<int>(array, 0, -1));
+        }
+
+        [Fact]
         public void ArrayRangeChecks()
         {
             var array = Array.Empty<string>();
@@ -100,6 +136,16 @@ namespace Pajn8.Test
 
             Assert.Throws<ArgumentException>(() => Paginator.CreateDirectNoNulls(array, 1, 0));
             Assert.Throws<ArgumentException>(() => Paginator.CreateDirectNoNulls(array, 0, 1));
+        }
+
+        [Fact]
+        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
+        public void ArrayRangeChecksNullable()
+        {
+            var array = Array.Empty<int?>();
+
+            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect<int>(array, 1, 0));
+            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect<int>(array, 0, 1));
         }
 
         [Fact]
@@ -134,6 +180,22 @@ namespace Pajn8.Test
         }
 
         [Fact]
+        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
+        public void KeysAndValuesLengthChecksNullable()
+        {
+            int?[] array1 = { 0 }, array2 = { 0, 0 };
+
+            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect<int, int?>(array1, array2));
+            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect<int, int?>(array2, array1));
+
+            Assert.Throws<ArgumentException>(() => Paginator.Create<int, int?>(array1, array2));
+            Assert.Throws<ArgumentException>(() => Paginator.Create<int, int?>(array2, array1));
+
+            Assert.Throws<ArgumentException>(() => Paginator.CreateStable<int, int?>(array1, array2));
+            Assert.Throws<ArgumentException>(() => Paginator.CreateStable<int, int?>(array2, array1));
+        }
+
+        [Fact]
         public void KeysAndValuesDifferChecks()
         {
             string[] array0 = Array.Empty<string>(), array1 = { "" };
@@ -147,6 +209,17 @@ namespace Pajn8.Test
 
             Paginator.CreateDirectNoNulls(array0, array0);
             Assert.Throws<ArgumentException>(() => Paginator.CreateDirectNoNulls(array1, array1));
+        }
+
+        [Fact]
+        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
+        public void KeysAndValuesDifferChecksNullable()
+        {
+            int?[] array0 = Array.Empty<int?>(), array1 = { 0 };
+
+            Paginator.CreateDirect<int, int?>(array0, array0);
+
+            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect<int, int?>(array1, array1));
         }
 
         [Fact]
@@ -198,16 +271,50 @@ namespace Pajn8.Test
                 int offset = 25, length = 25;
                 Assert.Equal(input.OrderBy(x => x).Skip(offset).Take(length), paginator.GetPage(offset, length));
             }
+
+            for (int seed = 0; seed < 10; ++seed)
+            {
+                var random = new Random(seed);
+                var input = new int?[100];
+                for (int i = 50; i < 100; ++i)
+                    input[i] = random.Next();
+                var paginator = Paginator.Create(input, input);
+                int offset = 25, length = 25;
+                Assert.Equal(input.OrderBy(x => x).Skip(offset).Take(length), paginator.GetPage(offset, length));
+            }
         }
 
         [Fact]
+        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
         public void StableSort()
         {
-            var chunk1 = Enumerable.Range(1, 50).Select(i => (x: 1, y: i));
-            var chunk2 = Enumerable.Range(1, 50).Select(i => (x: 0, y: i));
-            var comparer = Comparer<(int x, int y)>.Create((a, b) => a.x.CompareTo(b.x));
-            var paginator = Paginator.CreateStable(Enumerable.Concat(chunk1, chunk2), comparer);
-            Assert.Equal(Enumerable.Concat(chunk2, chunk1), paginator.GetPage(0, 100).Array);
+            {
+                var chunk1 = Enumerable.Range(1, 50).Select(i => (x: 1, y: i));
+                var chunk2 = Enumerable.Range(1, 50).Select(i => (x: 0, y: i));
+                var comparer = Comparer<(int x, int y)>.Create((a, b) => a.x.CompareTo(b.x));
+                var paginator = Paginator.CreateStable(Enumerable.Concat(chunk1, chunk2), comparer);
+                Assert.Equal(Enumerable.Concat(chunk2, chunk1), paginator.GetPage(0, 100).Array);
+            }
+            {
+                var chunk1 = Enumerable.Range(1, 50).Select(i => new PartialComparable(1, i));
+                var chunk2 = Enumerable.Range(1, 50).Select(i => new PartialComparable(0, i));
+                var paginator = Paginator.CreateStable(Enumerable.Concat(chunk1, chunk2));
+                Assert.Equal(Enumerable.Concat(chunk2, chunk1), paginator.GetPage(0, 100).Array);
+            }
+            {
+                var chunk1 = Enumerable.Range(1, 50).Select(i => (PartialComparable?)new PartialComparable(1, i));
+                var chunk2 = Enumerable.Range(1, 50).Select(i => (PartialComparable?)new PartialComparable(0, i));
+                var paginator = Paginator.CreateStable<PartialComparable>(Enumerable.Concat(chunk1, chunk2));
+                Assert.Equal(Enumerable.Concat(chunk2, chunk1), paginator.GetPage(0, 100).Array);
+            }
+        }
+
+        [Fact]
+        public void InvertedNullSort()
+        {
+            var enumerable = Enumerable.Range(1, 50).Select(i => i % 2 == 0 ? new ComparableWithNullGreater(i) : null);
+            var paginator = Paginator.Create(enumerable);
+            Assert.DoesNotContain(null, paginator.GetPage(0, 25));
         }
     }
 }

@@ -1,7 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pajn8
 {
+    [DebuggerDisplay("({Value}, {Index})")]
     internal struct Indexed<T>
     {
         [AllowNull]

@@ -1,60 +1,94 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Pajn8.Comparers;
+using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Pajn8
 {
-    internal sealed class Paginator<T, TComparer> : PaginatorBase<T>
-        where TComparer : IComparer<T>
+    internal sealed class Paginator<T, TComparer> : PaginatorBase<T, T, TComparer>
+        where TComparer : IComparer2<T>
     {
-        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain mutable value types")]
-        private TComparer comparer;
-        private bool faulted;
-        private readonly IComparer<T> boxedComparer;
-        private readonly PartitionNode rootNode;
-
-        internal Paginator(T[] items, int offset, int length, TComparer comparer)
-            : base(items, offset, length)
+        internal Paginator(T[] values, int offset, int length, in TComparer comparer)
+            : base(values, offset, length, comparer)
         {
-            this.comparer = comparer;
-            boxedComparer = comparer;
-            rootNode = new PartitionNode(offset, offset + length);
         }
 
-        protected override void DivideAndSort(int start, int end, int length)
+        protected override void DivideAndSort(int start, int end, int play, ref bool wrapException)
         {
-            if (faulted)
-                throw new InvalidOperationException(Strings.InvalidOperation_PaginatorFaulted);
+            SplitPartitions(start, end, play, ref wrapException);
+            SortPartitions(ref wrapException);
+        }
 
-            try
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SplitPartitions(int start, int end, int play, ref bool wrapException)
+        {
+            PartitionNode p;
+            for (int position = start; position < end; position = p.EndIndex)
             {
-                PartitionNode p;
-                for (int position = start; position < end; position = p.EndIndex)
+                p = rootNode.Find(position);
+                if (!p.IsSorted)
                 {
-                    p = rootNode.Find(position);
-                    if (!p.IsSorted)
-                    {
-                        while (end < p.EndIndex - length || start - length > p.StartIndex)
-                        {
-                            int k = PickPivotAndPartition(items, ref comparer, p.StartIndex, p.EndIndex - 1);
-                            p.Split(k);
-                            p = k > position ? p.LeftNode : p.RightNode;
-                        }
-
-                        Array.Sort(items, p.StartIndex, p.Count, boxedComparer);
-                        p.IsSorted = true;
-                    }
+                    p = SplitPartition(p, start, end, play, ref wrapException, position);
                 }
             }
-            catch
+
+            PartitionNode SplitPartition(PartitionNode p, int start, int end, int play, ref bool wrapException, int position)
             {
-                faulted = true;
-                throw;
+                int depthLimit = SortUtils.DepthLimit(values.Length) - p.Depth;
+                while (depthLimit > 0 && p.Count > SortUtils.InsertionSortThreshold && (end < p.EndIndex - play || start - play > p.StartIndex))
+                {
+                    int k = Partition(values, ref comparer, p.StartIndex, p.EndIndex - 1, ref wrapException);
+                    p.Split(k);
+                    p = k > position ? p.LeftNode : p.RightNode;
+                    --depthLimit;
+                }
+
+                if (numPartitionsToSort == partitionsToSort.Length)
+                {
+                    Array.Resize(ref partitionsToSort, numPartitionsToSort * 2);
+                }
+                partitionsToSort[numPartitionsToSort++] = p;
+                return p;
             }
         }
 
-        private static int PickPivotAndPartition(T[] items, ref TComparer comparer, int first, int last)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SortPartitions(ref bool wrapException)
+        {
+            int i = 0;
+            while (i < numPartitionsToSort)
+            {
+                PartitionNode p = partitionsToSort[i];
+                if (p.IsSorted)
+                {
+                    ++i;
+                    continue;
+                }
+
+                // gather contiguous partitions and sort
+                int minDepth = p.Depth;
+                int rangeStart = p.StartIndex, rangeEnd = p.EndIndex;
+                while (++i < numPartitionsToSort)
+                {
+                    p = partitionsToSort[i];
+                    if (p.StartIndex != rangeEnd)
+                    {
+                        break;
+                    }
+
+                    rangeEnd = p.EndIndex;
+                    if (minDepth > p.Depth)
+                        minDepth = p.Depth;
+                    p.IsSorted = true;
+                }
+                if (rangeEnd - rangeStart > 1)
+                    IntroSort(values, ref comparer, rangeStart, rangeEnd - 1, SortUtils.DepthLimit(values.Length) - minDepth, ref wrapException);
+            }
+
+            numPartitionsToSort = 0;
+        }
+
+        private static int Partition(T[] values, ref TComparer comparer, int first, int last, ref bool wrapException)
         {
             Debug.Assert(comparer != null);
             Debug.Assert(first <= last);
@@ -62,90 +96,217 @@ namespace Pajn8
             int left = first, right = last - 1;
             int count = last - first;
             int mid = first + (count / 2);
-            if (count > 40)
+            if (count > SortUtils.TukeyNintherThreshold)
             {
-                // John Tukey's ninther
                 int step = (count + 1) / 8;
-                MedianOfThree(items, ref comparer, first + step, first, first + step * 2);
-                MedianOfThree(items, ref comparer, mid - step, mid, mid + step);
-                MedianOfThree(items, ref comparer, last - step * 2, last, last - step);
+                MedianOfThree(values, ref comparer, first + step, first, first + step * 2);
+                MedianOfThree(values, ref comparer, mid - step, mid, mid + step);
+                MedianOfThree(values, ref comparer, last - step * 2, last, last - step);
             }
-            MedianOfThree(items, ref comparer, first, mid, last);
+            MedianOfThree(values, ref comparer, first, mid, last);
 
             T pivot;
             {
                 // Move (mid) to (last - 1)
-                ref T key1 = ref items[mid];
-                pivot = key1;
-                ref T key2 = ref items[last - 1];
-                key1 = key2;
-                key2 = pivot;
+                ref T value1 = ref values[mid];
+                pivot = value1;
+                ref T value2 = ref values[last - 1];
+                value1 = value2;
+                value2 = pivot;
             }
 
+            // Partition (first + 1)..(last - 2)
             while (left < right)
             {
-                while (comparer.Compare(items[++left], pivot) < 0)
+                while (comparer.GreaterThan(ref pivot, ref values[++left]))
+                {
                     if (left == last)
+                    {
+                        wrapException = false;
                         throw new ArgumentException(string.Format(Strings.Arg_BogusIComparer, comparer));
-                while (comparer.Compare(items[--right], pivot) > 0)
+                    }
+                }
+
+                while (comparer.LessThan(ref pivot, ref values[--right]))
+                {
                     if (right == first)
+                    {
+                        wrapException = false;
                         throw new ArgumentException(string.Format(Strings.Arg_BogusIComparer, comparer));
+                    }
+                }
 
                 if (left < right)
-                {
-                    // Swap (left) and (right)
-                    ref T item1 = ref items[left];
-                    T tmpItem = item1;
-                    ref T item2 = ref items[right];
-                    item1 = item2;
-                    item2 = tmpItem;
-                }
+                    Swap(values, left, right);
             }
 
             {
                 // Move pivot to destination
-                ref T item1 = ref items[last - 1];
-                ref T item2 = ref items[left];
-                item1 = item2;
-                item2 = pivot;
+                ref T value1 = ref values[last - 1];
+                ref T value2 = ref values[left];
+                value1 = value2;
+                value2 = pivot;
             }
 
             return left;
         }
 
-        private static void MedianOfThree(T[] items, ref TComparer comparer, int first, int mid, int last)
+        private static void MedianOfThree(T[] values, ref TComparer comparer, int first, int mid, int last)
         {
-            ref T firstItem = ref items[first];
-            ref T midItem = ref items[mid];
-            ref T lastItem = ref items[last];
+            ref T firstValue = ref values[first];
+            ref T midValue = ref values[mid];
+            ref T lastValue = ref values[last];
 
-            T tmpItem;
+            T tmpValue;
 
-            if (comparer.Compare(firstItem, midItem) > 0)
+            if (comparer.GreaterThan(ref firstValue, ref midValue))
             {
                 // Swap (first) and (mid)
-                tmpItem = firstItem;
-                firstItem = midItem;
-                midItem = tmpItem;
+                tmpValue = firstValue;
+                firstValue = midValue;
+                midValue = tmpValue;
             }
 
-            if (comparer.Compare(midItem, lastItem) > 0)
+            if (comparer.GreaterThan(ref midValue, ref lastValue))
             {
                 {
                     // Swap (mid) and (last)
-                    tmpItem = midItem;
-                    midItem = lastItem;
-                    lastItem = tmpItem;
+                    tmpValue = midValue;
+                    midValue = lastValue;
+                    lastValue = tmpValue;
                 }
 
-                if (comparer.Compare(firstItem, midItem) > 0)
+                if (comparer.GreaterThan(ref firstValue, ref midValue))
                 {
                     // Swap (first) and (mid)
-                    tmpItem = firstItem;
-                    firstItem = midItem;
-                    midItem = tmpItem;
+                    tmpValue = firstValue;
+                    firstValue = midValue;
+                    midValue = tmpValue;
                 }
             }
+        }
+
+        private static void SwapIfGreater(T[] values, ref TComparer comparer, int a, int b)
+        {
+            if (a != b)
+            {
+                ref T valuesA = ref values[a], valuesB = ref values[b];
+                T valueA = valuesA, valueB = valuesB;
+                if (comparer.GreaterThan(ref valueA, ref valueB))
+                {
+                    valuesA = valueB;
+                    valuesB = valueA;
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void InsertionSort(T[] values, ref TComparer comparer, int lo, int hi)
+        {
+            int partitionSize = hi - lo + 1;
+            if (partitionSize < 2)
+            {
+                return;
+            }
+
+            SwapIfGreater(values, ref comparer, lo, lo + 1);
+
+            if (partitionSize > 2)
+            {
+                SwapIfGreater(values, ref comparer, lo, lo + 2);
+                SwapIfGreater(values, ref comparer, lo + 1, lo + 2);
+
+                if (partitionSize > 3)
+                {
+                    InsertionSort(values, ref comparer, lo + 2, lo, hi);
+                }
+            }
+        }
+
+        private static void IntroSort(T[] values, ref TComparer comparer, int lo, int hi, int depthLimit, ref bool wrapException)
+        {
+            while (hi > lo)
+            {
+                int partitionSize = hi - lo + 1;
+                if (partitionSize <= SortUtils.InsertionSortThreshold)
+                {
+                    InsertionSort(values, ref comparer, lo, hi);
+                    break;
+                }
+
+                if (depthLimit == 0)
+                {
+                    Heapsort(values, ref comparer, lo, hi);
+                    break;
+                }
+
+                --depthLimit;
+
+                int p = Partition(values, ref comparer, lo, hi, ref wrapException);
+                IntroSort(values, ref comparer, p + 1, hi, depthLimit, ref wrapException);
+                hi = p - 1;
+            }
+        }
+
+        private static void Heapsort(T[] values, ref TComparer comparer, int lo, int hi)
+        {
+            int n = hi - lo + 1;
+            for (int i = n >> 1; i >= 1; --i)
+            {
+                DownHeap(values, ref comparer, i, n, lo);
+            }
+
+            for (int i = n - 1; i >= 1; --i)
+            {
+                Swap(values, lo, lo + i);
+                DownHeap(values, ref comparer, 1, i, lo);
+            }
+        }
+
+        private static void DownHeap(T[] values, ref TComparer comparer, int i, int n, int lo)
+        {
+            T d = values[lo + i - 1];
+            while (i <= n >> 1)
+            {
+                int child = 2 * i;
+                if (child < n && comparer.LessThan(ref values[lo + child - 1], ref values[lo + child]))
+                {
+                    ++child;
+                }
+                if (!comparer.LessThan(ref d, ref values[lo + child - 1]))
+                    break;
+                values[lo + i - 1] = values[lo + child - 1];
+                i = child;
+            }
+            values[lo + i - 1] = d;
+        }
+
+        private static void InsertionSort(T[] values, ref TComparer comparer, int i, int lo, int hi)
+        {
+            if (i == hi)
+                return;
+
+            int j = i;
+            T insertingItem = values[j + 1];
+            while (comparer.LessThan(ref insertingItem, ref values[j]) && --j >= lo)
+                ;
+
+            ++j;
+            for (int k = i; k >= j; --k)
+                values[k + 1] = values[k];
+            values[j] = insertingItem;
+
+            InsertionSort(values, ref comparer, i + 1, lo, hi);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Swap(T[] values, int i, int j)
+        {
+            ref T valuesI = ref values[i];
+            T tmpValue = valuesI;
+            ref T valuesJ = ref values[j];
+            valuesI = valuesJ;
+            valuesJ = tmpValue;
         }
     }
 }

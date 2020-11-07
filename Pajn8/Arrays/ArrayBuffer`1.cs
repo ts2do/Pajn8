@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pajn8
+namespace Pajn8.Arrays
 {
     internal struct ArrayBuffer<T>
     {

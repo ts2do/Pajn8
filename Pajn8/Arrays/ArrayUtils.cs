@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pajn8
+namespace Pajn8.Arrays
 {
     internal static class ArrayUtils
     {
