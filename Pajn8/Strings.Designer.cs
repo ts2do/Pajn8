@@ -61,15 +61,6 @@ namespace Pajn8 {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;{0}&quot; and &quot;{1}&quot; must be distinct arrays..
-        /// </summary>
-        internal static string Arg_ArraysMustBeDifferent {
-            get {
-                return ResourceManager.GetString("Arg_ArraysMustBeDifferent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Array is too short for given offset and length..
         /// </summary>
         internal static string Arg_ArrayTooShortForOffsetAndLength {

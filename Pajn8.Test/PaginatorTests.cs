@@ -196,33 +196,6 @@ namespace Pajn8.Test
         }
 
         [Fact]
-        public void KeysAndValuesDifferChecks()
-        {
-            string[] array0 = Array.Empty<string>(), array1 = { "" };
-            var comparer = Comparer<string>.Default;
-
-            Paginator.CreateDirect(array0, array0);
-            Paginator.CreateDirect(array0, array0, comparer);
-
-            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect(array1, array1));
-            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect(array1, array1, comparer));
-
-            Paginator.CreateDirectNoNulls(array0, array0);
-            Assert.Throws<ArgumentException>(() => Paginator.CreateDirectNoNulls(array1, array1));
-        }
-
-        [Fact]
-        [SuppressMessage("Style", "IDE0001:Name can be simplified", Justification = "Assert resolution of Nullable overload")]
-        public void KeysAndValuesDifferChecksNullable()
-        {
-            int?[] array0 = Array.Empty<int?>(), array1 = { 0 };
-
-            Paginator.CreateDirect<int, int?>(array0, array0);
-
-            Assert.Throws<ArgumentException>(() => Paginator.CreateDirect<int, int?>(array1, array1));
-        }
-
-        [Fact]
         public void GetPageRangeChecks()
         {
             var paginator = Paginator.CreateDirect(Array.Empty<int>());
