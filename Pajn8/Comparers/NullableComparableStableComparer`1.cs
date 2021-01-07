@@ -39,7 +39,7 @@ namespace Pajn8.Comparers
             else
             {
                 c = 0;
-                if (!(y.Value is null))
+                if (y.Value is not null)
                     c = -1;
             }
             return c;

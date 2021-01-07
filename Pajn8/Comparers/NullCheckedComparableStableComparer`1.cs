@@ -10,9 +10,9 @@ namespace Pajn8.Comparers
         public bool LessThan(ref Indexed<T> x, ref Indexed<T> y)
         {
             int c = 0;
-            if (!(x.Value is null))
+            if (x.Value is not null)
                 c = x.Value.CompareTo(y.Value);
-            else if (!(y.Value is null))
+            else if (y.Value is not null)
                 c = -y.Value.CompareTo(x.Value);
             bool result = c < 0;
             if (c == 0)
@@ -24,9 +24,9 @@ namespace Pajn8.Comparers
         public bool GreaterThan(ref Indexed<T> x, ref Indexed<T> y)
         {
             int c = 0;
-            if (!(x.Value is null))
+            if (x.Value is not null)
                 c = x.Value.CompareTo(y.Value);
-            else if (!(y.Value is null))
+            else if (y.Value is not null)
                 c = -y.Value.CompareTo(x.Value);
             bool result = c > 0;
             if (c == 0)

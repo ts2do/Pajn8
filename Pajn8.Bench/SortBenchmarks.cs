@@ -12,7 +12,7 @@ namespace Pajn8.Bench
         [Params(10000)]
         public int N;
 
-        [Params(0, 1)]
+        [Params(0)]
         public int Seed;
 
         [GlobalSetup]
@@ -27,10 +27,10 @@ namespace Pajn8.Bench
                 intArray[i] = random.Next();
         }
 
-        [Benchmark]
+        //[Benchmark]
         public void CopyArray() => Array.Copy(intArray, intArrayCopy, N);
 
-        [Benchmark]
+        //[Benchmark]
         public void ArraySort()
         {
             CopyArray();

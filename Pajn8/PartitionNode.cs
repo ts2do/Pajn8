@@ -7,8 +7,8 @@ namespace Pajn8
         public int StartIndex { get; }
         public int EndIndex { get; }
         public bool IsSorted { get; set; }
-        public PartitionNode LeftNode { get; private set; }
-        public PartitionNode RightNode { get; private set; }
+        public PartitionNode? LeftNode { get; private set; }
+        public PartitionNode? RightNode { get; private set; }
         public int Depth { get; }
 
         public int Count => EndIndex - StartIndex;
@@ -28,9 +28,9 @@ namespace Pajn8
             while (x.splitIndex >= 0)
             {
                 if (index < x.splitIndex)
-                    x = x.LeftNode;
+                    x = x.LeftNode!;
                 else
-                    x = x.RightNode;
+                    x = x.RightNode!;
             }
             return x;
         }

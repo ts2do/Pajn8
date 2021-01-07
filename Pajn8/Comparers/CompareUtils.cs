@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Pajn8.Utils
 {
+    [SuppressMessage("Style", "IDE0075:Simplify conditional expression", Justification = "Better codegen")]
     internal static class CompareUtils
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool LessThanNullUnchecked<T>(ref T x, ref T y)
+        public static bool LessThan<T>([NotNull] ref T x, [NotNull] ref T y)
             where T : IComparable<T>
         {
             if (typeof(T) == typeof(byte)) return (byte)(object)x < (byte)(object)y ? true : false;
@@ -23,7 +25,7 @@ namespace Pajn8.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool GreaterThanNullUnchecked<T>(ref T x, ref T y)
+        public static bool GreaterThan<T>([NotNull] ref T x, [NotNull] ref T y)
             where T : IComparable<T>
         {
             if (typeof(T) == typeof(byte)) return (byte)(object)x > (byte)(object)y ? true : false;
@@ -40,7 +42,7 @@ namespace Pajn8.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Compare<T>(ref T x, ref T y)
+        public static int Compare<T>([NotNull] ref T x, [NotNull] ref T y)
             where T : IComparable<T>
         {
             if (typeof(T) == typeof(byte)) return (byte)(object)x - (byte)(object)y;

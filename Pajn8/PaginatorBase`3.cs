@@ -1,6 +1,5 @@
 ﻿using Pajn8.Comparers;
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Pajn8
 {
@@ -10,7 +9,6 @@ namespace Pajn8
         protected readonly TValue[] values;
         protected readonly int offset;
         protected readonly int length;
-        [SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "May contain value types")]
         protected TComparer comparer;
         protected bool faulted;
         protected readonly PartitionNode rootNode;

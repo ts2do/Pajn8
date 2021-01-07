@@ -17,7 +17,7 @@ namespace Pajn8.Arrays
         private sealed class Node
         {
             public readonly T[] Array;
-            public Node Next;
+            public Node? Next;
 
             public Node(T[] array)
             {
@@ -27,7 +27,7 @@ namespace Pajn8.Arrays
 
         public ArrayBuffer(int initLength)
         {
-            var array = new T[initLength];
+            T[] array = GC.AllocateUninitializedArray<T>(initLength);
             buf = array;
             bufLength = initLength;
             head = tail = new Node(array);
@@ -40,7 +40,7 @@ namespace Pajn8.Arrays
             if (Count - offset == bufLength)
             {
                 bufLength = (int)Math.Min((uint)bufLength * 2, BufferLimit);
-                buf = ArrayUtils.AllocateArray<T>(bufLength);
+                buf = GC.AllocateUninitializedArray<T>(bufLength);
                 offset = Count;
                 tail = tail.Next = new Node(buf);
             }
@@ -50,9 +50,9 @@ namespace Pajn8.Arrays
 
         public T[] ToArray()
         {
-            var array = new T[Count];
+            T[] array = GC.AllocateUninitializedArray<T>(Count);
             int index = 0;
-            for (Node node = head, tail = this.tail; node != tail; node = node.Next)
+            for (Node node = head, tail = this.tail; node != tail; node = node.Next!)
             {
                 node.Array.CopyTo(array, index);
                 index += node.Array.Length;

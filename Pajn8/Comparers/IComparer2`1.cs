@@ -1,10 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Pajn8.Comparers
+﻿namespace Pajn8.Comparers
 {
-    public interface IComparer2<T>
+    internal interface IComparer2<T>
     {
-        bool LessThan([AllowNull] ref T x, [AllowNull] ref T y);
-        bool GreaterThan([AllowNull] ref T x, [AllowNull] ref T y);
+        bool LessThan(ref T x, ref T y);
+        bool GreaterThan(ref T x, ref T y);
     }
 }

@@ -7,8 +7,6 @@ namespace Pajn8.Arrays
     {
         public static Exception KeysAndValuesLengthMismatch() => new ArgumentException(string.Format(Strings.Arg_MismatchedLength, "keys", "values"));
 
-        public static T[] AllocateArray<T>(int length) => new T[length]; // TODO: Replace with inlined calls to GC.AllocateUninitializedArray
-
         public static Indexed<T>[] ToIndexedArray<T>(this IEnumerable<T> items)
         {
             return items switch
@@ -22,7 +20,7 @@ namespace Pajn8.Arrays
             {
                 using List<T>.Enumerator enumerator = list.GetEnumerator();
                 int length = list.Count;
-                var indexedKeys = AllocateArray<Indexed<T>>(length);
+                Indexed<T>[] indexedKeys = GC.AllocateUninitializedArray<Indexed<T>>(length);
                 for (int i = 0; i < length; ++i)
                 {
                     enumerator.MoveNext(); // Enforced by comodification checks
@@ -34,7 +32,7 @@ namespace Pajn8.Arrays
             static Indexed<T>[] CreateFromEnumerable(IEnumerable<T> enumerable)
             {
                 var buffer = new ArrayBuffer<Indexed<T>>(16);
-                foreach (var key in enumerable)
+                foreach (T key in enumerable)
                     buffer.Add().Set(key, buffer.Count);
                 return buffer.ToArray();
             }
@@ -43,7 +41,7 @@ namespace Pajn8.Arrays
         public static Indexed<T>[] ToIndexedArray<T>(this T[] items)
         {
             int length = items.Length;
-            var indexedKeys = AllocateArray<Indexed<T>>(length);
+            Indexed<T>[] indexedKeys = GC.AllocateUninitializedArray<Indexed<T>>(length);
             for (int i = 0; i < length; ++i)
                 indexedKeys[i].Set(items[i], i);
             return indexedKeys;
@@ -52,7 +50,7 @@ namespace Pajn8.Arrays
         public static Indexed<TResult>[] MapIndexed<TValue, TResult>(this TValue[] items, Func<TValue, TResult> keySelector)
         {
             int length = items.Length;
-            var indexedKeys = AllocateArray<Indexed<TResult>>(length);
+            Indexed<TResult>[] indexedKeys = GC.AllocateUninitializedArray<Indexed<TResult>>(length);
             for (int i = 0; i < length; ++i)
                 indexedKeys[i].Set(keySelector(items[i]), i);
             return indexedKeys;
@@ -77,7 +75,7 @@ namespace Pajn8.Arrays
             {
                 if (items.Count != expectedLength)
                     throw KeysAndValuesLengthMismatch();
-                var array = items.ToArray();
+                T[] array = items.ToArray();
                 if (array.Length != expectedLength)
                     throw KeysAndValuesLengthMismatch();
                 return array;
@@ -90,7 +88,7 @@ namespace Pajn8.Arrays
             }
             static T[] EnumerableToArray(IEnumerable<T> items, int expectedLength)
             {
-                var array = new T[expectedLength];
+                T[] array = GC.AllocateUninitializedArray<T>(expectedLength);
                 using IEnumerator<T> enumerator = items.GetEnumerator();
                 for (int i = 0; i < expectedLength; ++i)
                 {
@@ -107,7 +105,7 @@ namespace Pajn8.Arrays
         public static TResult[] Map<TValue, TResult>(this TValue[] items, Func<TValue, TResult> keySelector)
         {
             int length = items.Length;
-            var keys = AllocateArray<TResult>(length);
+            TResult[] keys = GC.AllocateUninitializedArray<TResult>(length);
             for (int i = 0; i < length; ++i)
                 keys[i] = keySelector(items[i]);
             return keys;

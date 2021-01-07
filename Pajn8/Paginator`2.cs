@@ -39,7 +39,7 @@ namespace Pajn8
                 {
                     int k = Partition(values, ref comparer, p.StartIndex, p.EndIndex - 1, ref wrapException);
                     p.Split(k);
-                    p = k > position ? p.LeftNode : p.RightNode;
+                    p = k > position ? p.LeftNode! : p.RightNode!;
                     --depthLimit;
                 }
 
