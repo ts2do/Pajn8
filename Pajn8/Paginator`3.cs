@@ -35,6 +35,7 @@ namespace Pajn8
                 }
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             PartitionNode SplitPartition(PartitionNode p, int start, int end, int play, ref bool wrapException, int position)
             {
                 int depthLimit = SortUtils.DepthLimit(values.Length) - p.Depth;
