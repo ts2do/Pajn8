@@ -816,19 +816,19 @@ namespace Pajn8
         #region Implementation
         private static Paginator<T, TComparer> CreateImpl<T, TComparer>(T[] items, int offset, int length, in TComparer comparer)
             where TComparer : IComparer2<T>
-            => new Paginator<T, TComparer>(items, offset, length, comparer);
+            => new(items, offset, length, comparer);
 
         private static Paginator<TKey, TValue, TComparer> CreateImpl<TKey, TValue, TComparer>(TKey[] keys, TValue[] values, int offset, int length, in TComparer comparer)
             where TComparer : IComparer2<TKey>
-            => new Paginator<TKey, TValue, TComparer>(keys, values, offset, length, comparer);
+            => new(keys, values, offset, length, comparer);
 
-        private static IPaginator<TValue> CreateImpl<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
+        private static Paginator<TKey, TValue, TComparer> CreateImpl<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
             where TComparer : IComparer2<TKey>
-            => new Paginator<TKey, TValue, TComparer>(values.Map(keySelector), values, 0, values.Length, comparer);
+            => new(values.Map(keySelector), values, 0, values.Length, comparer);
 
-        private static IPaginator<TValue> CreateStableImpl<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
+        private static Paginator<Indexed<TKey>, TValue, TComparer> CreateStableImpl<TKey, TValue, TComparer>(TValue[] values, Func<TValue, TKey> keySelector, TComparer comparer)
             where TComparer : IComparer2<Indexed<TKey>>
-            => new Paginator<Indexed<TKey>, TValue, TComparer>(values.MapIndexed(keySelector), values, 0, values.Length, comparer);
+            => new(values.MapIndexed(keySelector), values, 0, values.Length, comparer);
         #endregion
     }
 }

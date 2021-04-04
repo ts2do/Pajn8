@@ -21,7 +21,7 @@ namespace Pajn8.Bench
             intArray = new int[N];
             intArrayCopy = new int[N];
 
-            var random = new Random(Seed);
+            Random random = new(Seed);
             int i = N;
             while (--i >= 0)
                 intArray[i] = random.Next();

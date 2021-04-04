@@ -85,7 +85,7 @@ namespace Pajn8
                 throw;
             }
 
-            return new ArraySegment<TValue>(values, start, length);
+            return new(values, start, length);
         }
 
         protected abstract void DivideAndSort(int start, int end, int play, ref bool wrapException);

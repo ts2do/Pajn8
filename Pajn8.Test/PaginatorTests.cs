@@ -225,7 +225,7 @@ namespace Pajn8.Test
         {
             for (int seed = 0; seed < 10; ++seed)
             {
-                var random = new Random(seed);
+                Random random = new(seed);
                 var input = new int[100];
                 for (int i = 0; i < 100; ++i)
                     input[i] = random.Next();
@@ -236,7 +236,7 @@ namespace Pajn8.Test
 
             for (int seed = 0; seed < 10; ++seed)
             {
-                var random = new Random(seed);
+                Random random = new(seed);
                 var input = new int[100];
                 for (int i = 0; i < 100; ++i)
                     input[i] = random.Next();
@@ -247,7 +247,7 @@ namespace Pajn8.Test
 
             for (int seed = 0; seed < 10; ++seed)
             {
-                var random = new Random(seed);
+                Random random = new(seed);
                 var input = new int?[100];
                 for (int i = 50; i < 100; ++i)
                     input[i] = random.Next();
@@ -275,8 +275,8 @@ namespace Pajn8.Test
                 Assert.Equal(Enumerable.Concat(chunk2, chunk1), paginator.GetPage(0, 100).Array);
             }
             {
-                var chunk1 = Enumerable.Range(1, 50).Select(i => (PartialComparable?)new PartialComparable(1, i));
-                var chunk2 = Enumerable.Range(1, 50).Select(i => (PartialComparable?)new PartialComparable(0, i));
+                var chunk1 = Enumerable.Range(1, 50).Select(i => (PartialComparable?)new(1, i));
+                var chunk2 = Enumerable.Range(1, 50).Select(i => (PartialComparable?)new(0, i));
                 var paginator = Paginator.CreateStable<PartialComparable>(Enumerable.Concat(chunk1, chunk2));
                 Assert.Equal(Enumerable.Concat(chunk2, chunk1), paginator.GetPage(0, 100).Array);
             }

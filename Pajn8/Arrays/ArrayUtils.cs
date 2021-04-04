@@ -5,7 +5,8 @@ namespace Pajn8.Arrays
 {
     internal static class ArrayUtils
     {
-        public static Exception KeysAndValuesLengthMismatch() => new ArgumentException(string.Format(Strings.Arg_MismatchedLength, "keys", "values"));
+        public static ArgumentException KeysAndValuesLengthMismatch()
+            => new(string.Format(Strings.Arg_MismatchedLength, "keys", "values"));
 
         public static Indexed<T>[] ToIndexedArray<T>(this IEnumerable<T> items)
         {
@@ -31,7 +32,7 @@ namespace Pajn8.Arrays
 
             static Indexed<T>[] CreateFromEnumerable(IEnumerable<T> enumerable)
             {
-                var buffer = new ArrayBuffer<Indexed<T>>(16);
+                ArrayBuffer<Indexed<T>> buffer = new(16);
                 foreach (T key in enumerable)
                     buffer.Add().Set(key, buffer.Count);
                 return buffer.ToArray();
