@@ -15,7 +15,7 @@ public interface IPaginator<T>
 
 # Benchmark
 
-The table below shows relative times which compares the medians of M operations for determining the first 1000 sorted elements of x, a randomy generated int[N], where ``x.AsSpan().Sort()`` is used as the baseline. Because the source data is randomly generated, results will vary due to the nature of the partitioning algorithm.
+The table below shows relative times which compares the medians of M operations for determining the first 1000 sorted elements of x, a randomly generated int[N], where ``x.AsSpan().Sort()`` is used as the baseline. Because the source data is randomly generated, results will vary due to the nature of the partitioning algorithm.
 
 | M      | N          | x.AsSpan().Sort() | Array.Sort(x) | Paginator.CreateDirect(x).GetPage(0, 10) |
 | :--    | :--        |               --: |           --: |                                      --: |
